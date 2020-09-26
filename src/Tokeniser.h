@@ -46,13 +46,10 @@ public:
 	Tokeniser(std::ifstream& pdfFileStream, std::streamoff startPos = 0);
 	~Tokeniser() noexcept;
 
-	std::string tokenizeDocumentHeader(int* major, int* minor) const;
+	std::string getDocumentHeader(int* major, int* minor) const;
 	std::streamoff getStartXref(bool andLocate = true) const;
 	std::pair<std::any, Tokeniser::TokenTypes> nextToken() const;
-
 	void seek(std::streamoff pos) const;
-
-	const char* getVersionToken() const;
 
 	static bool isWhitespace(int c);
 private:

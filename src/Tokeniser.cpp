@@ -11,11 +11,7 @@ Tokeniser::~Tokeniser() noexcept {
     // dtor
 }
 
-const char* Tokeniser::getVersionToken() const {
-	return m_pdfVersionToken;
-}
-
-std::string Tokeniser::tokenizeDocumentHeader(int* major, int* minor) const {
+std::string Tokeniser::getDocumentHeader(int* major, int* minor) const {
 	std::streamsize buffSize = 1024;
 	std::string buffer(buffSize, '\0');
 

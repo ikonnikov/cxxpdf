@@ -21,7 +21,7 @@ void PDFDoc::tokenize_document(std::ifstream& pdfFileStream) {
 
 	std::unique_ptr<Tokeniser> documentTokeniser = std::make_unique<Tokeniser>(pdfFileStream, 0);
 
-	m_pdfVersion.pdfVersion = documentTokeniser->tokenizeDocumentHeader(&m_pdfVersion.major, &m_pdfVersion.minor);
+	m_pdfVersion.pdfVersion = documentTokeniser->getDocumentHeader(&m_pdfVersion.major, &m_pdfVersion.minor);
 	m_xref = std::make_unique<XRef>(documentTokeniser);
 }
 
