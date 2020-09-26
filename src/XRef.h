@@ -2,8 +2,6 @@
 
 #include <fstream>
 #include <mutex>
-//#include <algorithm>
-#include <iostream>  // todo: delete it
 
 #include "Tokeniser.h"
 
@@ -19,6 +17,4 @@ private:
 
 private:
 	mutable std::recursive_mutex m_mutex;
-
-	//int64_t m_lastXrefPos;
 };

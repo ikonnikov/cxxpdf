@@ -4,13 +4,11 @@
 #include <boost/lexical_cast.hpp>
 
 Tokeniser::Tokeniser(std::ifstream& pdfFileStream, std::streamoff startPos) : m_pdfFileStream(pdfFileStream), m_pdfVersionToken("%PDF-") {
-    std::cout << u8"this is a ctor::Tokeniser" << std::endl;  // todo: cout delete it
-
     seek(startPos);
 }
 
 Tokeniser::~Tokeniser() noexcept {
-    std::cout << u8"this is a dtor::Tokeniser" << std::endl;  // todo: cout delete it
+    // dtor
 }
 
 const char* Tokeniser::getVersionToken() const {

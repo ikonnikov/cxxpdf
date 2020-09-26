@@ -5,7 +5,6 @@
 #include <filesystem>
 #include <memory>
 #include <mutex>
-#include <iostream>  // todo: delete it
 
 #include "XRef.h"
 #include "Tokeniser.h"

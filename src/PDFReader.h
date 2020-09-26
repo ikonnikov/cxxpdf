@@ -3,7 +3,6 @@
 #include <string>
 #include <filesystem>
 #include <memory>
-#include <iostream>  // todo: delete it
 
 #include "PDFDoc.h"
 

@@ -1,12 +1,9 @@
 #include "PDFDoc.h"
 
 PDFDoc::PDFDoc(const std::filesystem::path& filePath) : m_isOK(false), m_fileSize(0), m_pdfVersion{"", 0, 0 }, m_xref(nullptr) {
-	std::cout << u8"this is a ctor::CPDFDoc" << std::endl;  // todo: cout delete it
-
 	std::ifstream pdfFileStream(filePath, std::ios::binary | std::ios::in);
 
 	if (!pdfFileStream.is_open()) {
-		std::cout << u8"Не удалось открыть файл (1): " << filePath << std::endl;  // todo: cout delete it
 		throw std::exception("Failed to open the file");
 	}
 
@@ -16,7 +13,7 @@ PDFDoc::PDFDoc(const std::filesystem::path& filePath) : m_isOK(false), m_fileSiz
 }
 
 PDFDoc::~PDFDoc() noexcept {
-	std::cout << u8"this is a dtor::CPDFDoc" << std::endl;  // todo: cout delete it
+	// dtor
 }
 
 void PDFDoc::tokenize_document(std::ifstream& pdfFileStream) {

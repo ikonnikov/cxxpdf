@@ -1,13 +1,11 @@
 #include "XRef.h"
 
 XRef::XRef(std::unique_ptr<Tokeniser>& documentTokeniser) {
-    std::cout << u8"this is a ctor::XRef" << std::endl;  // todo: cout delete it
-
     read_xref(documentTokeniser);
 }
 
 XRef::~XRef() noexcept {
-    std::cout << u8"this is a dtor::XRef" << std::endl;  // todo: cout delete it
+    // dtor
 }
 
 void XRef::read_xref(std::unique_ptr<Tokeniser>& documentTokeniser) {
@@ -42,13 +40,6 @@ void XRef::read_xref(std::unique_ptr<Tokeniser>& documentTokeniser) {
         return;
 
     int a = 1;  // todo: fuck it
-
-    /*
-    if (tokenType == Tokeniser::TokenTypes::kTK_STRING || tokenType == Tokeniser::TokenTypes::kTK_OTHER)  // todo: cout delete it
-        std::cout << tokenValue.type().name() << ": " << std::any_cast<std::string>(tokenValue) << std::endl;  // todo: cout delete it
-    else  // todo: cout delete it
-        std::cout << ": N/A" << std::endl;  // todo: cout delete it
-    */
 }
 
 bool XRef::read_xref_stream(std::unique_ptr<Tokeniser>& documentTokeniser) {
@@ -80,9 +71,6 @@ bool XRef::read_xref_stream(std::unique_ptr<Tokeniser>& documentTokeniser) {
     }
 
     //read_object();
-
-
-
 
     return false;  // todo
 }

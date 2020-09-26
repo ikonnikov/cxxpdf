@@ -3,7 +3,6 @@
 #include <fstream>
 #include <any>
 #include <utility>
-#include <iostream>  // todo: delete it
 
 static const char specialChars[256] = {
 	1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, // 0x
@@ -56,10 +55,6 @@ public:
 	const char* getVersionToken() const;
 
 	static bool isWhitespace(int c);
-
-	
-
-
 private:
 	std::ifstream& m_pdfFileStream;
 
