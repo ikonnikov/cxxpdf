@@ -1,3 +1,7 @@
+// Copyright (c) 2020 cxxPDF project, Ikonnikov Kirill, All rights reserved.
+//
+// Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+
 #pragma once
 
 #include <string>
@@ -19,8 +23,8 @@ private:
 
 public:
 	PDFDoc() = delete;
-	PDFDoc(const std::filesystem::path& filePath);
-	~PDFDoc() noexcept;
+	explicit PDFDoc(const std::filesystem::path& filePath);
+	virtual ~PDFDoc() noexcept;
 
 	bool isOk() const;
 	std::uintmax_t getFileSize() const;
@@ -32,11 +36,11 @@ private:
 	void tokenize_document(std::ifstream& pdfFileStream);
 
 private:
+	mutable std::recursive_mutex m_mutex;
+
 	bool m_isOK;
 	std::uintmax_t m_fileSize;
 
 	PDFVersion m_pdfVersion;
 	std::unique_ptr<XRef> m_xref;
-
-	mutable std::recursive_mutex m_mutex;
 };

@@ -105,6 +105,7 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)Build\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>Build\$(Platform)\$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)-test</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -120,6 +121,7 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)Build\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>Build\$(Platform)\$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)-test</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -227,9 +229,16 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="src\PDFArray.cpp" />
+    <ClCompile Include="src\PDFDictionary.cpp" />
     <ClCompile Include="src\PDFDoc.cpp" />
+    <ClCompile Include="src\PDFIndirectReference.cpp" />
+    <ClCompile Include="src\PDFLiteral.cpp" />
+    <ClCompile Include="src\PDFName.cpp" />
+    <ClCompile Include="src\PDFNumber.cpp" />
     <ClCompile Include="src\PDFObject.cpp" />
     <ClCompile Include="src\PDFReader.cpp" />
+    <ClCompile Include="src\PDFString.cpp" />
     <ClCompile Include="test\BaseTests.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug unit-tests|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -250,9 +259,16 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\PDFArray.h" />
+    <ClInclude Include="src\PDFDictionary.h" />
     <ClInclude Include="src\PDFDoc.h" />
+    <ClInclude Include="src\PDFIndirectReference.h" />
+    <ClInclude Include="src\PDFLiteral.h" />
+    <ClInclude Include="src\PDFName.h" />
+    <ClInclude Include="src\PDFNumber.h" />
     <ClInclude Include="src\PDFObject.h" />
     <ClInclude Include="src\PDFReader.h" />
+    <ClInclude Include="src\PDFString.h" />
     <ClInclude Include="src\Tokeniser.h" />
     <ClInclude Include="src\XRef.h" />
   </ItemGroup>

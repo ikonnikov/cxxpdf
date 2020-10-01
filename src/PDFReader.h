@@ -1,3 +1,7 @@
+// Copyright (c) 2020 cxxPDF project, Ikonnikov Kirill, All rights reserved.
+//
+// Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+
 #pragma once
 
 #include <string>
@@ -10,12 +14,12 @@ class PDFReader {
 public:
 	PDFReader() = delete;
 	PDFReader(const std::string& filename);
-	~PDFReader() noexcept;
+	virtual ~PDFReader() noexcept;
 
 	const std::shared_ptr<PDFDoc> getPDFDocument();
 
 private:
-	void load_from_file(const std::filesystem::path& filePath);
+	void load_from_file();
 
 private:
 	std::string m_password;

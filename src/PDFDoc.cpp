@@ -1,3 +1,7 @@
+// Copyright (c) 2020 cxxPDF project, Ikonnikov Kirill, All rights reserved.
+//
+// Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+
 #include "PDFDoc.h"
 
 PDFDoc::PDFDoc(const std::filesystem::path& filePath) : m_isOK(false), m_fileSize(0), m_pdfVersion{"", 0, 0 }, m_xref(nullptr) {
@@ -41,5 +45,5 @@ std::uintmax_t PDFDoc::getFileSize() const {
 }
 
 int PDFDoc::getNumberOfPages() const {
-	return 0;
+	return 0;  // todo: impl it
 }
