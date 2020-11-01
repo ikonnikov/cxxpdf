@@ -65,6 +65,9 @@
     <ClCompile Include="src\PDFIndirectReference.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\PDFStream.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\PDFDoc.h">
@@ -101,6 +104,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\PDFIndirectReference.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PDFStream.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

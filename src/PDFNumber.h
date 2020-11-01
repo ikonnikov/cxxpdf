@@ -9,14 +9,18 @@
 
 #include "PDFObject.h"
 
+class PDFNumber;
+using PDFNumberPtr = std::shared_ptr<PDFNumber>;
+
 class PDFNumber : public virtual PDFObject {
  public:
-     PDFNumber(int64_t intValue);
+     PDFNumber(std::int64_t intValue);
      PDFNumber(double realValue);
      virtual ~PDFNumber() noexcept;
 
-     virtual size_t getLength() const override;
+     std::size_t getLength() const override;
+     const std::variant<std::int64_t, double> getValue() const;
 
- private:
-     std::variant<int64_t, double> m_value;
+ protected:
+     std::variant<std::int64_t, double> m_value;
 };

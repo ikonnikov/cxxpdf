@@ -14,10 +14,10 @@ PDFArray::~PDFArray() {
     std::cout << __FUNCSIG__ << std::endl;
 }
 
-size_t PDFArray::getLength() const {
+std::size_t PDFArray::getLength() const {
     return m_value.size();
 }
 
-void PDFArray::add(const std::shared_ptr<PDFObject> pdfObject) {
+void PDFArray::add(const PDFObjectPtr pdfObject) {
     m_value.push_back(pdfObject);
 }

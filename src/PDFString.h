@@ -8,13 +8,18 @@
 
 #include "PDFObject.h"
 
+class PDFString;
+using PDFStringPtr = std::shared_ptr<PDFString>;
+
 class PDFString : public virtual PDFObject {
  public:
-    explicit PDFString(const std::string& pdfString);
+    explicit PDFString(const std::string& pdfString, bool isHex = false);
     virtual ~PDFString() noexcept;
 
-    virtual size_t getLength() const override;
+    std::size_t getLength() const override;
+    bool isHex() const;
 
- private:
+ protected:
     const std::string m_value;
+    const bool m_isHex;
 };

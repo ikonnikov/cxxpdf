@@ -14,33 +14,31 @@
 #include "Tokeniser.h"
 
 class PDFDoc {
-private:
-	struct PDFVersion {
-		std::string pdfVersion;
-		int major;
-		int minor;
-	};
+ private:
+     struct PDFVersion {
+         std::string pdfVersion;
+         int major;
+         int minor;
+     };
 
-public:
-	PDFDoc() = delete;
-	explicit PDFDoc(const std::filesystem::path& filePath);
-	virtual ~PDFDoc() noexcept;
+ public:
+     PDFDoc() = delete;
+     explicit PDFDoc(const std::filesystem::path& filePath);
+     virtual ~PDFDoc() noexcept;
 
-	bool isOk() const;
-	std::uintmax_t getFileSize() const;
+     std::uintmax_t getFileSize() const;
 
-	const std::string getPDFVersion(int* major, int* minor) const;
-	int getNumberOfPages() const;
+     const std::string getPDFVersion(int* major, int* minor) const;
+     int getNumberOfPages() const;
 
-private:
-	void tokenize_document(std::ifstream& pdfFileStream);
+ private:
+     void tokenize_document(std::ifstream& pdfFileStream);
 
-private:
-	mutable std::recursive_mutex m_mutex;
+ private:
+     mutable std::recursive_mutex m_mutex;
 
-	bool m_isOK;
-	std::uintmax_t m_fileSize;
+     std::uintmax_t m_fileSize;
 
-	PDFVersion m_pdfVersion;
-	std::unique_ptr<XRef> m_xref;
+     PDFVersion m_pdfVersion;
+     std::unique_ptr<XRef> m_xref;
 };

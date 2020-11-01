@@ -14,14 +14,10 @@ PDFName::~PDFName() {
     std::cout << __FUNCSIG__ << " = " << m_value << std::endl;
 }
 
-size_t PDFName::getLength() const {
+std::size_t PDFName::getLength() const {
     return m_value.size();
 }
 
 const std::string PDFName::getName() const {
     return m_value;
-}
-
-bool PDFName::operator<(const PDFName& other) const {
-    return m_value < other.getName();
 }

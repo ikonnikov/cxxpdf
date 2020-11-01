@@ -14,7 +14,7 @@ PDFLiteral::~PDFLiteral() {
     std::cout << __FUNCSIG__ << std::endl;
 }
 
-size_t PDFLiteral::getLength() const {
+std::size_t PDFLiteral::getLength() const {
     return 0;
 }
 

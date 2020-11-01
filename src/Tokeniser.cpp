@@ -29,13 +29,13 @@ std::string Tokeniser::getDocumentHeader(int* major, int* minor) const {
     if (!m_pdfFileStream.read(&buffer[0], buffSize))
         throw std::exception("Failed to tokenize a document (pdf header don't readed)");
 
-    size_t findStringLen = strlen(m_pdfVersionToken);
+    std::size_t findStringLen = strlen(m_pdfVersionToken);
 
     std::size_t pdfTokenBegPos = buffer.find(m_pdfVersionToken);
     if (pdfTokenBegPos == std::string::npos)
         throw std::exception("Failed to tokenize a document (pdf header begin don't found)");
 
-    auto pdfTokenEndPos = buffer.find_first_of(" \t\n\r", pdfTokenBegPos + findStringLen);
+    std::size_t pdfTokenEndPos = buffer.find_first_of(" \t\n\r", pdfTokenBegPos + findStringLen);
     if (pdfTokenEndPos == std::string::npos)
         throw std::exception("Failed to tokenize a document (pdf header end don't found)");
 
@@ -46,6 +46,13 @@ std::string Tokeniser::getDocumentHeader(int* major, int* minor) const {
     m_pdfFileStream.seekg(pdfTokenEndPos + 1);
 
     return pdfVersion;
+}
+
+bool Tokeniser::readStream(std::string& buffer, std::streamsize buffSize) const {
+    if (m_pdfFileStream.read(&buffer[0], buffSize))
+        return true;
+    
+    return false;
 }
 
 std::streamoff Tokeniser::getStartXref(bool andLocate) const {
@@ -128,11 +135,12 @@ std::pair<std::any, Tokeniser::Types> Tokeniser::nextToken() const {
     case '%':
         tempBuff.str(std::string());
 
-        do {  // todo: skip %-token
+        currentChar = m_pdfFileStream.get();  // pass-through the %-token and jump to next char
+        while (currentChar != std::ifstream::traits_type::eof() && currentChar != '\r' && currentChar != '\n') {
             tempBuff << currentChar;
 
             currentChar = m_pdfFileStream.get();
-        } while (currentChar != std::ifstream::traits_type::eof() && currentChar != '\r' && currentChar != '\n');
+        }
 
         tempString = tempBuff.str();
 
@@ -140,11 +148,13 @@ std::pair<std::any, Tokeniser::Types> Tokeniser::nextToken() const {
         break;
 
     case '<':
-        nestedChar1 = m_pdfFileStream.get();
+        //nestedChar1 = m_pdfFileStream.get();  // todo: delete it
 
-        while (isWhitespace(nestedChar1))
+        nestedChar1 = skipWhitespaces(m_pdfFileStream.get());
+        /*
+        while (Tokeniser::isWhitespace(nestedChar1))
             nestedChar1 = m_pdfFileStream.get();
-
+        */
         if (nestedChar1 == '<') {
             return std::make_pair(nullptr, Tokeniser::Types::kTK_START_DIC);
             break;
@@ -153,9 +163,12 @@ std::pair<std::any, Tokeniser::Types> Tokeniser::nextToken() const {
         tempBuff.str(std::string());
 
         while (true) {
-            while (isWhitespace(nestedChar1))
+            nestedChar1 = skipWhitespaces(nestedChar1);
+            // todo: delete it
+            /*
+            while (Tokeniser::isWhitespace(nestedChar1))
                 nestedChar1 = m_pdfFileStream.get();
-
+            */
             if (nestedChar1 == '>')
                 break;
 
@@ -163,11 +176,12 @@ std::pair<std::any, Tokeniser::Types> Tokeniser::nextToken() const {
             if (nestedChar1 < 0)
                 break;
 
-            nestedChar2 = m_pdfFileStream.get();
-
-            while (isWhitespace(nestedChar2))
+            //nestedChar2 = m_pdfFileStream.get();  // todo: delete it
+            nestedChar2 = skipWhitespaces(m_pdfFileStream.get());
+            /*
+            while (Tokeniser::isWhitespace(nestedChar2))
                 nestedChar2 = m_pdfFileStream.get();
-
+            */
             if (nestedChar2 == '>') {
                 currentChar = nestedChar1 << 4;
 
@@ -190,13 +204,12 @@ std::pair<std::any, Tokeniser::Types> Tokeniser::nextToken() const {
 
         tempString = tempBuff.str();
 
-        return std::make_pair(std::make_any<std::string>(tempString), Tokeniser::Types::kTK_STRING);
+        return std::make_pair(std::make_any<std::string>(tempString), Tokeniser::Types::kTK_STRING_HEX);
         break;
 
     case '>':
         currentChar = m_pdfFileStream.get();
         if (currentChar != '>') {
-            auto poss = m_pdfFileStream.tellg();  // todo: delete it
             throw std::exception("Failed to tokenize a document (greater than not expected)");
         }
 
@@ -244,7 +257,7 @@ std::pair<std::any, Tokeniser::Types> Tokeniser::nextToken() const {
             backOnePosition();
 
             if (tempString.find(".") == std::string::npos)
-                return std::make_pair(std::make_any<int64_t>(boost::lexical_cast<int64_t>(tempString)), Tokeniser::Types::kTK_NUMBER_INT);
+                return std::make_pair(std::make_any<std::int64_t>(boost::lexical_cast<std::int64_t>(tempString)), Tokeniser::Types::kTK_NUMBER_INT);
             else
                 return std::make_pair(std::make_any<double>(boost::lexical_cast<double>(tempString)), Tokeniser::Types::kTK_NUMBER_REAL);
         } else {
@@ -252,8 +265,7 @@ std::pair<std::any, Tokeniser::Types> Tokeniser::nextToken() const {
                 tempBuff << currentChar;
 
                 currentChar = m_pdfFileStream.get();
-            } while (!specialChars[currentChar]);
-            //} while (specialChars[currentChar] == 0);  // todo: is to best?
+            } while (specialChars[currentChar] == 0);
 
             tempString = tempBuff.str();
 
@@ -288,10 +300,10 @@ int Tokeniser::getHex(int v) {
 
 std::pair<std::any, Tokeniser::Types> Tokeniser::nextValidToken() const {
     int level = 0;
-    std::streamoff fstPos;
+    std::streamoff frstTokenPos(0);
 
-    int64_t fstToken(0);
-    int64_t scndToken(0);
+    std::int64_t frstTokenValue(0);
+    std::int64_t scndTokenValue(0);
 
     while (true) {
         auto [tokenValue, tokenType] = nextToken();
@@ -306,34 +318,54 @@ std::pair<std::any, Tokeniser::Types> Tokeniser::nextValidToken() const {
             if (tokenType != Tokeniser::Types::kTK_NUMBER_INT)
                 return std::make_pair(tokenValue, tokenType);
 
-            fstPos = tell();
-            fstToken = std::any_cast<int64_t>(tokenValue);
+            frstTokenPos = tell();
+            frstTokenValue = std::any_cast<std::int64_t>(tokenValue);
 
             ++level;
             break;
 
         case 1:
             if (tokenType != Tokeniser::Types::kTK_NUMBER_INT) {
-                seek(fstPos);
+                seek(frstTokenPos);
 
-                return std::make_pair(std::make_any<int64_t>(fstToken), Tokeniser::Types::kTK_NUMBER_INT);
+                return std::make_pair(std::make_any<std::int64_t>(frstTokenValue), Tokeniser::Types::kTK_NUMBER_INT);
             }
 
-            scndToken = std::any_cast<int64_t>(tokenValue);
+            scndTokenValue = std::any_cast<std::int64_t>(tokenValue);
 
             ++level;
             break;
 
         default:
             if (tokenType == Tokeniser::Types::kTK_OTHER && std::any_cast<std::string>(tokenValue) == "R")
-                return std::make_pair(std::make_any<std::pair<int64_t, int64_t>>(fstToken, scndToken), Tokeniser::Types::kTK_REF);
+                return std::make_pair(std::make_any<std::pair<std::int64_t, std::int64_t>>(frstTokenValue, scndTokenValue), Tokeniser::Types::kTK_REF);
             else {
-                seek(fstPos);
+                seek(frstTokenPos);
                 
-                return std::make_pair(std::make_any<int64_t>(fstToken), Tokeniser::Types::kTK_NUMBER_INT);
+                return std::make_pair(std::make_any<std::int64_t>(frstTokenValue), Tokeniser::Types::kTK_NUMBER_INT);
             }
         }
     }
 
     return std::make_pair(nullptr, Tokeniser::Types::kTK_NA);
+}
+
+char Tokeniser::skipWhitespaces(const char currentChar) const {
+    char checkChar = currentChar;
+
+    while (Tokeniser::isWhitespace(checkChar))
+        checkChar = m_pdfFileStream.get();
+
+    return checkChar;
+}
+
+char Tokeniser::skipWhitespaces() const {
+    char checkChar = m_pdfFileStream.get();
+
+    while (Tokeniser::isWhitespace(checkChar))
+        checkChar = m_pdfFileStream.get();
+
+    backOnePosition();
+
+    return checkChar;
 }

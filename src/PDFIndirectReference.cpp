@@ -10,7 +10,7 @@ PDFIndirectReference::PDFIndirectReference() : m_number(0), m_generation(){
     this->m_type = PDFObject::Types::kINDIRECT;
 }
 
-PDFIndirectReference::PDFIndirectReference(const std::pair<int64_t, int64_t>& refPair) : m_number(std::get<0>(refPair)), m_generation(std::get<1>(refPair)) {
+PDFIndirectReference::PDFIndirectReference(const std::pair<std::int64_t, std::int64_t>& refPair) : m_number(std::get<0>(refPair)), m_generation(std::get<1>(refPair)) {
     std::cout << __FUNCSIG__ << std::endl;
 
     this->m_type = PDFObject::Types::kINDIRECT;
@@ -20,6 +20,6 @@ PDFIndirectReference::~PDFIndirectReference() {
     std::cout << __FUNCSIG__ << std::endl;
 }
 
-size_t PDFIndirectReference::getLength() const {
+std::size_t PDFIndirectReference::getLength() const {
     return 0;
 }

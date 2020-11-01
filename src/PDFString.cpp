@@ -6,7 +6,7 @@
 
 #include <iostream>  // todo: delete it
 
-PDFString::PDFString(const std::string& pdfString) : m_value(pdfString) {
+PDFString::PDFString(const std::string& pdfString, bool isHex) : m_value(pdfString), m_isHex(isHex) {
     std::cout << __FUNCSIG__ << " = " << pdfString << std::endl;
 
     this->m_type = PDFObject::Types::kSTRING;
@@ -16,6 +16,10 @@ PDFString::~PDFString() {
     std::cout << __FUNCSIG__ << std::endl;
 }
 
-size_t PDFString::getLength() const {
+std::size_t PDFString::getLength() const {
     return m_value.size();
+}
+
+bool PDFString::isHex() const {
+    return m_isHex;
 }

@@ -10,14 +10,22 @@
 #include "PDFObject.h"
 #include "PDFName.h"
 
+class PDFDictionary;
+using MapDict = std::map<const PDFNamePtr, const PDFObjectPtr, PDFName::cmpByStringName>;
+using PDFDictionaryPtr = std::shared_ptr<PDFDictionary>;
+
 class PDFDictionary : public virtual PDFObject {
  public:
     PDFDictionary();
     virtual ~PDFDictionary() noexcept;
 
-    virtual size_t getLength() const override;
-    void put(const std::shared_ptr<PDFName> ppdfName, const std::shared_ptr<PDFObject> pdfObject);
+    std::size_t getLength() const override;
+    std::size_t getSize() const;
+    void put(const PDFNamePtr& pdfName, const PDFObjectPtr pdfObject);
+    const PDFObjectPtr get(const PDFNamePtr& pdfName) const;
+    const MapDict::const_iterator begin() const;
+    const MapDict::const_iterator end() const;
 
  protected:
-     std::map<const std::shared_ptr<PDFName>, const std::shared_ptr<PDFObject>> m_value;
+     MapDict m_value;
 };

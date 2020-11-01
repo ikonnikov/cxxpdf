@@ -9,17 +9,24 @@
 
 #include "PDFObject.h"
 
+class PDFName;
+using PDFNamePtr = std::shared_ptr<PDFName>;
+
 class PDFName : public virtual PDFObject {
  public:
      explicit PDFName(const std::string& pdfName);
      virtual ~PDFName() noexcept;
      
-     virtual size_t getLength() const override;
+     std::size_t getLength() const override;
      const std::string getName() const;
 
  public:
-     bool operator<(const PDFName& other) const;
+    struct cmpByStringName {
+        bool operator() (const PDFNamePtr& lhs, const PDFNamePtr& rhs) const {
+            return lhs->getName() < rhs->getName();
+        }
+    };
 
- private:
+ protected:
      const std::string m_value;
 };

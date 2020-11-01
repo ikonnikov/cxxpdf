@@ -9,6 +9,9 @@
 
 #include "PDFObject.h"
 
+class PDFLiteral;
+using PDFLiteralPtr = std::shared_ptr<PDFLiteral>;
+
 class PDFLiteral : public virtual PDFObject {
  public:
     enum class Types {
@@ -22,7 +25,7 @@ class PDFLiteral : public virtual PDFObject {
     explicit PDFLiteral(const PDFLiteral::Types type);
     virtual ~PDFLiteral() noexcept;
 
-    virtual size_t getLength() const override;
+    std::size_t getLength() const override;
     PDFLiteral::Types getLiteralType() const;
 
  private:

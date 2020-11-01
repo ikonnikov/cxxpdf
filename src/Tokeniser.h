@@ -10,7 +10,10 @@
 #include <string>
 #include <iostream>  // todo: delete it
 
-constexpr int64_t kDEFAULT_BUF_SIZE = 1024;  // size of buffer
+class Tokeniser;
+using TokeniserPtr = std::shared_ptr<Tokeniser>;
+
+constexpr std::int64_t kDEFAULT_BUF_SIZE = 1024;  // size of buffer
 
 // '1' = character is white space (white-space characters, table 3.1 => 0(NULL), 9(TAB), 10(LF), 12(FF), 13(CR), 32(SPACE))
 // '2' = special delimeters, character ends a name or command => 40('('), 41(')'), 60('<'), 62('>'), 91('['), 93(']'), 123('{'), 125('}'), 47('/'), 37('%')
@@ -40,6 +43,7 @@ class Tokeniser {
         kTK_NUMBER_INT,
         kTK_NUMBER_REAL,
         kTK_STRING,
+        kTK_STRING_HEX,
         kTK_NAME,
         kTK_COMMENT,
         kTK_START_ARRAY,
@@ -68,6 +72,10 @@ class Tokeniser {
 
     static bool isWhitespace(int c);
     static int getHex(int v);
+
+    bool readStream(std::string& buffer, std::streamsize buffSize) const;
+    char skipWhitespaces(const char currentChar) const;
+    char skipWhitespaces() const;
 
  private:
     std::ifstream& m_pdfFileStream;

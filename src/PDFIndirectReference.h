@@ -8,15 +8,18 @@
 
 #include "PDFObject.h"
 
+class PDFIndirectReference;
+using PDFIndirectReferencePtr = std::shared_ptr<PDFIndirectReference>;
+
 class PDFIndirectReference : public virtual PDFObject {
-public:
-    PDFIndirectReference();
-    explicit PDFIndirectReference(const std::pair<int64_t, int64_t>& refPair);
-    virtual ~PDFIndirectReference() noexcept;
+ public:
+     PDFIndirectReference();
+     explicit PDFIndirectReference(const std::pair<std::int64_t, std::int64_t>& refPair);
+     virtual ~PDFIndirectReference() noexcept;
 
-    virtual size_t getLength() const override;
+     std::size_t getLength() const override;
 
-private:
-    int64_t m_number;
-    int64_t m_generation;
+ protected:
+     std::int64_t m_number;
+     std::int64_t m_generation;
 };

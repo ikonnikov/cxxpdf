@@ -9,15 +9,17 @@
 
 #include "PDFObject.h"
 
+class PDFArray;
+using PDFArrayPtr = std::shared_ptr<PDFArray>;
+
 class PDFArray : public virtual PDFObject {
  public:
-    //explicit PDFArray();
     PDFArray();
     virtual ~PDFArray() noexcept;
 
-    virtual size_t getLength() const override;
-    void add(std::shared_ptr<PDFObject>);
+    std::size_t getLength() const override;
+    void add(PDFObjectPtr pdfObject);
 
- private:
-    std::vector<std::shared_ptr<PDFObject>> m_value;
+ protected:
+    std::vector<PDFObjectPtr> m_value;
 };

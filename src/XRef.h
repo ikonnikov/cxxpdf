@@ -17,24 +17,23 @@
 #include "PDFArray.h"
 #include "PDFLiteral.h"
 #include "PDFIndirectReference.h"
+#include "PDFStream.h"
 
 class XRef {
  public:
     XRef() = delete;
-    explicit XRef(std::unique_ptr<Tokeniser>& documentTokeniser);
+    explicit XRef(TokeniserPtr& documentTokeniser);
     virtual ~XRef() noexcept;
 
  private:
-    void read_xref();
-    bool read_xref_stream();
-    bool read_xref_section();
+    void read_xref(TokeniserPtr& documentTokeniser);
+    bool read_xref_stream(TokeniserPtr& documentTokeniser);
+    bool read_xref_section(TokeniserPtr& documentTokeniser);
 
-    std::shared_ptr<PDFObject> read_object();
-    std::shared_ptr<PDFDictionary> read_dictionary();
-    std::shared_ptr<PDFArray> read_array();
+    PDFObjectPtr read_object(TokeniserPtr& documentTokeniser);
+    PDFDictionaryPtr read_dictionary(TokeniserPtr& documentTokeniser);
+    PDFArrayPtr read_array(TokeniserPtr& documentTokeniser);
 
  private:
     mutable std::recursive_mutex m_mutex;
-
-    std::unique_ptr<Tokeniser>& m_documentTokeniser;
 };

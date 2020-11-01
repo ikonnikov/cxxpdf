@@ -4,8 +4,8 @@
 
 #include "PDFNumber.h"
 
-PDFNumber::PDFNumber(int64_t intValue) : m_value(intValue) {
-    std::cout << __FUNCSIG__ << " = " << std::get<int64_t>(m_value) << std::endl;
+PDFNumber::PDFNumber(std::int64_t intValue) : m_value(intValue) {
+    std::cout << __FUNCSIG__ << " = " << std::get<std::int64_t>(m_value) << std::endl;
     
     this->m_type = PDFObject::Types::kNUMBER_INT;
 }
@@ -20,11 +20,15 @@ PDFNumber::~PDFNumber() {
     if (this->m_type == PDFObject::Types::kNUMBER_REAL)
         std::cout << __FUNCSIG__ << " = " << std::get<double>(m_value) << std::endl;
     else if (this->m_type == PDFObject::Types::kNUMBER_INT)
-        std::cout << __FUNCSIG__ << " = " << std::get<int64_t>(m_value) << std::endl;
+        std::cout << __FUNCSIG__ << " = " << std::get<std::int64_t>(m_value) << std::endl;
     else
         std::cout << __FUNCSIG__ << " !!! (n/a) !!!" << std::endl;
 }
 
-size_t PDFNumber::getLength() const {
+std::size_t PDFNumber::getLength() const {
     return 1;
+}
+
+const std::variant<std::int64_t, double> PDFNumber::getValue() const {
+    return m_value;
 }

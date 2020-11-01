@@ -8,6 +8,9 @@
 #include <memory>
 #include <iostream>  // todo: delete it
 
+class PDFObject;
+using PDFObjectPtr = std::shared_ptr<PDFObject>;
+
 class PDFObject {
  public:
     enum class Types {
@@ -28,7 +31,7 @@ class PDFObject {
     PDFObject();
     virtual ~PDFObject() noexcept;
 
-    virtual size_t getLength() const = 0;
+    virtual std::size_t getLength() const = 0;
     virtual PDFObject::Types getType() const;
 
  protected:

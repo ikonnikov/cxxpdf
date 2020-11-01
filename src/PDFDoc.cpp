@@ -4,8 +4,8 @@
 
 #include "PDFDoc.h"
 
-PDFDoc::PDFDoc(const std::filesystem::path& filePath) : m_isOK(false), m_fileSize(0), m_pdfVersion{"", 0, 0 }, m_xref(nullptr) {
-	std::ifstream pdfFileStream(filePath, std::ios::binary | std::ios::in);
+PDFDoc::PDFDoc(const std::filesystem::path& filePath) : m_fileSize(0), m_pdfVersion{"", 0, 0 }, m_xref(nullptr) {
+    std::ifstream pdfFileStream(filePath, std::ios::binary | std::ios::in);
 
 	if (!pdfFileStream.is_open()) {
 		throw std::exception("Failed to open the file");
@@ -23,7 +23,7 @@ PDFDoc::~PDFDoc() noexcept {
 void PDFDoc::tokenize_document(std::ifstream& pdfFileStream) {
 	std::unique_lock<std::recursive_mutex> localLocker(m_mutex);
 
-	std::unique_ptr<Tokeniser> documentTokeniser = std::make_unique<Tokeniser>(pdfFileStream, 0);
+	TokeniserPtr documentTokeniser = std::make_shared<Tokeniser>(pdfFileStream, 0);
 
 	m_pdfVersion.pdfVersion = documentTokeniser->getDocumentHeader(&m_pdfVersion.major, &m_pdfVersion.minor);
 	m_xref = std::make_unique<XRef>(documentTokeniser);
@@ -34,10 +34,6 @@ const std::string PDFDoc::getPDFVersion(int* major, int* minor) const {
 	*minor = m_pdfVersion.minor;
 	
 	return m_pdfVersion.pdfVersion;
-}
-
-bool PDFDoc::isOk() const {
-	return m_isOK;
 }
 
 std::uintmax_t PDFDoc::getFileSize() const {
