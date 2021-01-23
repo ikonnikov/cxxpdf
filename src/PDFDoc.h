@@ -1,4 +1,4 @@
-// Copyright (c) 2020 cxxPDF project, Ikonnikov Kirill, All rights reserved.
+﻿// Copyright (c) 2020 cxxPDF project, Ikonnikov Kirill, All rights reserved.
 //
 // Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
 
@@ -9,6 +9,8 @@
 #include <filesystem>
 #include <memory>
 #include <mutex>
+#include <boost/iostreams/device/file.hpp>
+#include <boost/iostreams/stream.hpp>
 
 #include "XRef.h"
 #include "Tokeniser.h"
@@ -32,9 +34,9 @@ class PDFDoc {
      int getNumberOfPages() const;
 
  private:
-     void tokenize_document(std::ifstream& pdfFileStream);
+     void tokenize_document(boost::iostreams::stream<boost::iostreams::file_source>& pdfStreamData);
 
- private:
+ protected:
      mutable std::recursive_mutex m_mutex;
 
      std::uintmax_t m_fileSize;

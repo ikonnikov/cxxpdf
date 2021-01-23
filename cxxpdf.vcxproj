@@ -200,6 +200,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>D:\Development\bins\boost\boost_1_74_0\stage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -240,6 +241,8 @@
     <ClCompile Include="src\PDFReader.cpp" />
     <ClCompile Include="src\PDFStream.cpp" />
     <ClCompile Include="src\PDFString.cpp" />
+    <ClCompile Include="src\PredictorFilter.cpp" />
+    <ClCompile Include="src\StreamDecoder.cpp" />
     <ClCompile Include="test\BaseTests.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug unit-tests|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -271,10 +274,11 @@
     <ClInclude Include="src\PDFReader.h" />
     <ClInclude Include="src\PDFStream.h" />
     <ClInclude Include="src\PDFString.h" />
+    <ClInclude Include="src\PredictorFilter.hpp" />
+    <ClInclude Include="src\StreamDecoder.h" />
     <ClInclude Include="src\Tokeniser.h" />
     <ClInclude Include="src\XRef.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets">
-  </ImportGroup>
+  <ImportGroup Label="ExtensionTargets" />
 </Project>

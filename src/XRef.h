@@ -1,4 +1,4 @@
-// Copyright (c) 2020 cxxPDF project, Ikonnikov Kirill, All rights reserved.
+﻿// Copyright (c) 2020 cxxPDF project, Ikonnikov Kirill, All rights reserved.
 //
 // Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
 
@@ -8,6 +8,7 @@
 #include <mutex>
 #include <string>
 #include <memory>
+#include <utility>
 
 #include "Tokeniser.h"
 #include "PDFObject.h"
@@ -18,6 +19,7 @@
 #include "PDFLiteral.h"
 #include "PDFIndirectReference.h"
 #include "PDFStream.h"
+#include "PDFNumber.h"
 
 class XRef {
  public:

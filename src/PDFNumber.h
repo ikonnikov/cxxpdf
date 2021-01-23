@@ -1,11 +1,11 @@
-// Copyright (c) 2020 cxxPDF project, Ikonnikov Kirill, All rights reserved.
+﻿// Copyright (c) 2020 cxxPDF project, Ikonnikov Kirill, All rights reserved.
 //
 // Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
 
 #pragma once
 
 #include <variant>
-#include <iostream>  // todo: delete it
+#include <memory>
 
 #include "PDFObject.h"
 
@@ -14,8 +14,8 @@ using PDFNumberPtr = std::shared_ptr<PDFNumber>;
 
 class PDFNumber : public virtual PDFObject {
  public:
-     PDFNumber(std::int64_t intValue);
-     PDFNumber(double realValue);
+     explicit PDFNumber(std::int64_t intValue);
+     explicit PDFNumber(double realValue);
      virtual ~PDFNumber() noexcept;
 
      std::size_t getLength() const override;

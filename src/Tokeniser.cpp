@@ -1,15 +1,12 @@
-// Copyright (c) 2020 cxxPDF project, Ikonnikov Kirill, All rights reserved.
+﻿// Copyright (c) 2020 cxxPDF project, Ikonnikov Kirill, All rights reserved.
 //
 // Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
 
 #include "Tokeniser.h"
 
-#include <sstream>
-#include <boost/lexical_cast.hpp>
-
-Tokeniser::Tokeniser(std::ifstream& pdfFileStream, std::streamoff startPos) : m_pdfFileStream(pdfFileStream), m_endStreamPos(-1), m_pdfVersionToken("%PDF-") {
-    m_pdfFileStream.seekg(0, std::ios_base::end);
-    m_endStreamPos = m_pdfFileStream.tellg();
+Tokeniser::Tokeniser(boost::iostreams::stream<boost::iostreams::file_source>& pdfStream, std::streamoff startPos) : m_pdfStream(pdfStream), m_endStreamPos(-1) {
+    m_pdfStream.seekg(0, std::ios_base::end);
+    m_endStreamPos = m_pdfStream.tellg();
 
     seek(startPos);
 }
@@ -26,12 +23,12 @@ std::string Tokeniser::getDocumentHeader(int* major, int* minor) const {
 
     std::string buffer(buffSize, '\0');
 
-    if (!m_pdfFileStream.read(&buffer[0], buffSize))
+    if (!m_pdfStream.read(&buffer[0], buffSize))
         throw std::exception("Failed to tokenize a document (pdf header don't readed)");
 
-    std::size_t findStringLen = strlen(m_pdfVersionToken);
+    std::size_t findStringLen = std::strlen(kPDF_VERSION_TOKEN);
 
-    std::size_t pdfTokenBegPos = buffer.find(m_pdfVersionToken);
+    std::size_t pdfTokenBegPos = buffer.find(kPDF_VERSION_TOKEN);
     if (pdfTokenBegPos == std::string::npos)
         throw std::exception("Failed to tokenize a document (pdf header begin don't found)");
 
@@ -43,15 +40,15 @@ std::string Tokeniser::getDocumentHeader(int* major, int* minor) const {
 
     sscanf_s(pdfVersion.c_str(), "%d.%d", major, minor);
 
-    m_pdfFileStream.seekg(pdfTokenEndPos + 1);
+    m_pdfStream.seekg(pdfTokenEndPos + 1);
 
     return pdfVersion;
 }
 
 bool Tokeniser::readStream(std::string& buffer, std::streamsize buffSize) const {
-    if (m_pdfFileStream.read(&buffer[0], buffSize))
+    if (m_pdfStream.read(&buffer[0], buffSize))
         return true;
-    
+
     return false;
 }
 
@@ -61,7 +58,7 @@ std::streamoff Tokeniser::getStartXref(bool andLocate) const {
     if (buffSize > m_endStreamPos)
         buffSize = m_endStreamPos;
 
-    std::streamoff startPos = m_pdfFileStream.tellg();
+    std::streamoff startPos = m_pdfStream.tellg();
     std::streamoff currPos = m_endStreamPos;
     std::ios_base::seekdir seekDirection = std::ios_base::end;
 
@@ -71,41 +68,41 @@ std::streamoff Tokeniser::getStartXref(bool andLocate) const {
         if (currPos < buffSize)
             buffSize = currPos;
 
-        m_pdfFileStream.seekg(-1 * buffSize, seekDirection);
-        currPos = m_pdfFileStream.tellg();
+        m_pdfStream.seekg(-1 * buffSize, seekDirection);
+        currPos = m_pdfStream.tellg();
 
         std::string buffer(buffSize, '\0');
-        if (!m_pdfFileStream.read(&buffer[0], buffSize))
+        if (!m_pdfStream.read(&buffer[0], buffSize))
             throw std::exception("Failed to tokenize a document (start xref position don't readed)");
 
         std::size_t xrefBufferPos = buffer.rfind("startxref");
         if (xrefBufferPos != std::string::npos) {
             seekedPos = currPos + std::fpos<std::size_t>(xrefBufferPos);
 
-            m_pdfFileStream.seekg(seekedPos);
+            m_pdfStream.seekg(seekedPos);
             break;
         } else {
-            m_pdfFileStream.seekg(currPos);
+            m_pdfStream.seekg(currPos);
             seekDirection = std::ios_base::cur;
         }
     }
 
     if (!andLocate)
-        m_pdfFileStream.seekg(startPos);
+        m_pdfStream.seekg(startPos);
 
     return seekedPos;
 }
 
 void Tokeniser::seek(std::streamoff newPos) const {
-    m_pdfFileStream.seekg(newPos);
+    m_pdfStream.seekg(newPos);
 }
 
 std::streamoff Tokeniser::tell() const {
-    return m_pdfFileStream.tellg();
+    return m_pdfStream.tellg();
 }
 
 void Tokeniser::backOnePosition() const {
-    m_pdfFileStream.seekg(-1, std::ios_base::cur);
+    m_pdfStream.seekg(-1, std::ios_base::cur);
 }
 
 std::pair<std::any, Tokeniser::Types> Tokeniser::nextToken() const {
@@ -117,7 +114,7 @@ std::pair<std::any, Tokeniser::Types> Tokeniser::nextToken() const {
     char nestedChar2 = '\0';
 
     do {
-        currentChar = m_pdfFileStream.get();
+        currentChar = m_pdfStream.get();
     } while (currentChar != std::ifstream::traits_type::eof() && Tokeniser::isWhitespace(currentChar));
 
     if (currentChar == std::ifstream::traits_type::eof())
@@ -135,11 +132,11 @@ std::pair<std::any, Tokeniser::Types> Tokeniser::nextToken() const {
     case '%':
         tempBuff.str(std::string());
 
-        currentChar = m_pdfFileStream.get();  // pass-through the %-token and jump to next char
+        currentChar = m_pdfStream.get();  // pass-through the %-token and jump to next char
         while (currentChar != std::ifstream::traits_type::eof() && currentChar != '\r' && currentChar != '\n') {
             tempBuff << currentChar;
 
-            currentChar = m_pdfFileStream.get();
+            currentChar = m_pdfStream.get();
         }
 
         tempString = tempBuff.str();
@@ -148,13 +145,8 @@ std::pair<std::any, Tokeniser::Types> Tokeniser::nextToken() const {
         break;
 
     case '<':
-        //nestedChar1 = m_pdfFileStream.get();  // todo: delete it
+        nestedChar1 = skipWhitespaces(m_pdfStream.get());
 
-        nestedChar1 = skipWhitespaces(m_pdfFileStream.get());
-        /*
-        while (Tokeniser::isWhitespace(nestedChar1))
-            nestedChar1 = m_pdfFileStream.get();
-        */
         if (nestedChar1 == '<') {
             return std::make_pair(nullptr, Tokeniser::Types::kTK_START_DIC);
             break;
@@ -164,11 +156,7 @@ std::pair<std::any, Tokeniser::Types> Tokeniser::nextToken() const {
 
         while (true) {
             nestedChar1 = skipWhitespaces(nestedChar1);
-            // todo: delete it
-            /*
-            while (Tokeniser::isWhitespace(nestedChar1))
-                nestedChar1 = m_pdfFileStream.get();
-            */
+
             if (nestedChar1 == '>')
                 break;
 
@@ -176,12 +164,8 @@ std::pair<std::any, Tokeniser::Types> Tokeniser::nextToken() const {
             if (nestedChar1 < 0)
                 break;
 
-            //nestedChar2 = m_pdfFileStream.get();  // todo: delete it
-            nestedChar2 = skipWhitespaces(m_pdfFileStream.get());
-            /*
-            while (Tokeniser::isWhitespace(nestedChar2))
-                nestedChar2 = m_pdfFileStream.get();
-            */
+            nestedChar2 = skipWhitespaces(m_pdfStream.get());
+
             if (nestedChar2 == '>') {
                 currentChar = nestedChar1 << 4;
 
@@ -196,7 +180,7 @@ std::pair<std::any, Tokeniser::Types> Tokeniser::nextToken() const {
             currentChar = (nestedChar1 << 4) + nestedChar2;
             tempBuff << currentChar;
 
-            nestedChar1 = m_pdfFileStream.get();
+            nestedChar1 = m_pdfStream.get();
         }
 
         if (nestedChar1 < 0 || nestedChar2 < 0)
@@ -208,7 +192,7 @@ std::pair<std::any, Tokeniser::Types> Tokeniser::nextToken() const {
         break;
 
     case '>':
-        currentChar = m_pdfFileStream.get();
+        currentChar = m_pdfStream.get();
         if (currentChar != '>') {
             throw std::exception("Failed to tokenize a document (greater than not expected)");
         }
@@ -220,12 +204,12 @@ std::pair<std::any, Tokeniser::Types> Tokeniser::nextToken() const {
         tempBuff.str(std::string());
 
         do {
-            currentChar = m_pdfFileStream.get();
+            currentChar = m_pdfStream.get();
 
             if (specialChars[currentChar] != 0)
                 break;
             else if (currentChar == '#')  // next two chars is a hex-number
-                currentChar = getHex(m_pdfFileStream.get() << 4) + getHex(m_pdfFileStream.get());
+                currentChar = getHex(m_pdfStream.get() << 4) + getHex(m_pdfStream.get());
 
             tempBuff << currentChar;
         } while (currentChar != std::ifstream::traits_type::eof());
@@ -249,7 +233,7 @@ std::pair<std::any, Tokeniser::Types> Tokeniser::nextToken() const {
             do {
                 tempBuff << currentChar;
 
-                currentChar = m_pdfFileStream.get();
+                currentChar = m_pdfStream.get();
             } while (currentChar != std::ifstream::traits_type::eof() && ((currentChar >= '0' && currentChar <= '9') || currentChar == '.'));
 
             tempString = tempBuff.str();
@@ -264,7 +248,7 @@ std::pair<std::any, Tokeniser::Types> Tokeniser::nextToken() const {
             do {
                 tempBuff << currentChar;
 
-                currentChar = m_pdfFileStream.get();
+                currentChar = m_pdfStream.get();
             } while (specialChars[currentChar] == 0);
 
             tempString = tempBuff.str();
@@ -337,11 +321,11 @@ std::pair<std::any, Tokeniser::Types> Tokeniser::nextValidToken() const {
             break;
 
         default:
-            if (tokenType == Tokeniser::Types::kTK_OTHER && std::any_cast<std::string>(tokenValue) == "R")
+            if (tokenType == Tokeniser::Types::kTK_OTHER && std::any_cast<std::string>(tokenValue) == "R") {
                 return std::make_pair(std::make_any<std::pair<std::int64_t, std::int64_t>>(frstTokenValue, scndTokenValue), Tokeniser::Types::kTK_REF);
-            else {
+            } else {
                 seek(frstTokenPos);
-                
+
                 return std::make_pair(std::make_any<std::int64_t>(frstTokenValue), Tokeniser::Types::kTK_NUMBER_INT);
             }
         }
@@ -354,16 +338,16 @@ char Tokeniser::skipWhitespaces(const char currentChar) const {
     char checkChar = currentChar;
 
     while (Tokeniser::isWhitespace(checkChar))
-        checkChar = m_pdfFileStream.get();
+        checkChar = m_pdfStream.get();
 
     return checkChar;
 }
 
 char Tokeniser::skipWhitespaces() const {
-    char checkChar = m_pdfFileStream.get();
+    char checkChar = m_pdfStream.get();
 
     while (Tokeniser::isWhitespace(checkChar))
-        checkChar = m_pdfFileStream.get();
+        checkChar = m_pdfStream.get();
 
     backOnePosition();
 

@@ -1,10 +1,8 @@
-// Copyright (c) 2020 cxxPDF project, Ikonnikov Kirill, All rights reserved.
+﻿// Copyright (c) 2020 cxxPDF project, Ikonnikov Kirill, All rights reserved.
 //
 // Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
 
 #include "XRef.h"
-#include "PDFObject.h"
-#include "PDFNumber.h"
 
 XRef::XRef(TokeniserPtr& documentTokeniser) {
     read_xref(documentTokeniser);
@@ -124,7 +122,7 @@ PDFObjectPtr XRef::read_object(TokeniserPtr& documentTokeniser) {
     case Tokeniser::Types::kTK_STRING:
         pdfObject = std::make_shared<PDFString>(std::any_cast<std::string>(tokenValue), false);
         break;
-    
+
     case Tokeniser::Types::kTK_STRING_HEX:
         pdfObject = std::make_shared<PDFString>(std::any_cast<std::string>(tokenValue), true);
         break;
@@ -163,13 +161,13 @@ PDFDictionaryPtr XRef::read_dictionary(TokeniserPtr& documentTokeniser) {
     while (true) {
         auto [tokenValue, tokenType] = documentTokeniser->nextValidToken();
 
-        if (tokenType == Tokeniser::Types::kTK_COMMENT)
+        if (tokenType == Tokeniser::Types::kTK_COMMENT) {
             continue;
 
-        else if (tokenType == Tokeniser::Types::kTK_ENDOFFILE)
+        } else if (tokenType == Tokeniser::Types::kTK_ENDOFFILE) {
             break;
 
-        else if (tokenType == Tokeniser::Types::kTK_END_DIC) {
+        } else if (tokenType == Tokeniser::Types::kTK_END_DIC) {
             std::streamoff dictEndPos = documentTokeniser->tell();
 
             // let's look at the next token
@@ -188,13 +186,13 @@ PDFDictionaryPtr XRef::read_dictionary(TokeniserPtr& documentTokeniser) {
             documentTokeniser->seek(dictEndPos);  // rewind to end of dict
             break;
 
-        }
-        else if (tokenType != Tokeniser::Types::kTK_NAME)
+        } else if (tokenType != Tokeniser::Types::kTK_NAME) {
             throw std::exception("Failed to read a xref (dictionary key is not a name)");
+        }
 
         PDFObjectPtr pdfObject = read_object(documentTokeniser);
 
-        if (pdfObject->getType() == PDFObject::Types::kLITERAL) {
+        if (pdfObject->isLiteral()) {
             PDFLiteralPtr pdfLiteral = std::dynamic_pointer_cast<PDFLiteral>(pdfObject);
 
             if (pdfLiteral->getLiteralType() == PDFLiteral::Types::kLIT_END_DIC)
@@ -239,20 +237,30 @@ PDFDictionaryPtr XRef::read_dictionary(TokeniserPtr& documentTokeniser) {
             PDFObjectPtr lengthToken = pdfDictionary->get(std::make_shared<PDFName>("Length"));
 
             std::size_t length = 0;
-            if (lengthToken->getType() == PDFObject::Types::kNUMBER_INT)
+            if (lengthToken->isInteger())
                 length = std::get<std::int64_t>(std::dynamic_pointer_cast<PDFNumber>(lengthToken)->getValue());
 
             if (length == 0) {
                 // todo: impl recalculate stream lenght
             }
 
-            //pdfStream->setLength(length);
-
             std::string buffer(length, '\0');
             if (!documentTokeniser->readStream(buffer, length))
                 throw std::exception("Failed to tokenize a document (start xref position didn't read)");
 
-            pdfStream->setStreamBytes(buffer.c_str(), length);
+            pdfStream->setRawStreamBytes(buffer.c_str(), length);
+            std::shared_ptr<boost::iostreams::filtering_istream> decodedStream = std::dynamic_pointer_cast<boost::iostreams::filtering_istream>(pdfStream->decodeFilteredStream());
+
+            //TokeniserPtr streamTokeniser(decodedStream);
+            
+            // todo: for try
+            char buf[512];
+            ::memset(&buf[0], '\0', 512);
+
+            decodedStream->read(&buf[0], 512);
+            std::size_t read_size = decodedStream->gcount();
+
+            auto cc = 0;
         }
     }
 
@@ -265,7 +273,7 @@ PDFArrayPtr XRef::read_array(TokeniserPtr& documentTokeniser) {
     while (true) {
         PDFObjectPtr pdfObject = read_object(documentTokeniser);
 
-        if (pdfObject->getType() == PDFObject::Types::kLITERAL) {
+        if (pdfObject->isLiteral()) {
             PDFLiteralPtr pdfLiteral = std::dynamic_pointer_cast<PDFLiteral>(pdfObject);
 
             if (pdfLiteral->getLiteralType() == PDFLiteral::Types::kLIT_END_DIC)

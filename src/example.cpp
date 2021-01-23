@@ -1,4 +1,4 @@
-// Copyright (c) 2020 cxxPDF project, Ikonnikov Kirill, All rights reserved.
+ï»¿// Copyright (c) 2020 cxxPDF project, Ikonnikov Kirill, All rights reserved.
 //
 // Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
 
@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
     std::string filename(argv[1]);
 
     std::cout.imbue(std::locale("ru_RU.UTF-8"));
-    std::cout << u8"Ïðèâåò, ìèð!" << std::endl;
+    std::cout << u8"ÐŸÑ€Ð¸Ð²ÐµÑ‚, Ð¼Ð¸Ñ€!" << std::endl;
 
     std::unique_ptr<PDFReader> pdfReader = std::make_unique<PDFReader>(filename);
 

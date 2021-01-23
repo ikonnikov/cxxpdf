@@ -1,4 +1,4 @@
-// Copyright (c) 2020 cxxPDF project, Ikonnikov Kirill, All rights reserved.
+﻿// Copyright (c) 2020 cxxPDF project, Ikonnikov Kirill, All rights reserved.
 //
 // Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
 
@@ -6,7 +6,6 @@
 
 #include <stdint.h>
 #include <memory>
-#include <iostream>  // todo: delete it
 
 class PDFObject;
 using PDFObjectPtr = std::shared_ptr<PDFObject>;
@@ -33,6 +32,18 @@ class PDFObject {
 
     virtual std::size_t getLength() const = 0;
     virtual PDFObject::Types getType() const;
+
+    bool isDictionary() const;
+    bool isLiteral() const;
+    bool isInteger() const;
+    bool isReal() const;
+    bool isBoolean() const;
+    bool isString() const;
+    bool isArray() const;
+    bool isStream() const;
+    bool isName() const;
+    bool isNull() const;
+    bool isIndirect() const;
 
  protected:
     PDFObject::Types m_type;
