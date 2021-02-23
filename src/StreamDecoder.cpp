@@ -4,11 +4,15 @@
 
 #include "StreamDecoder.h"
 
-std::shared_ptr<std::istream> StreamDecoder::makeFlateDecodeStream(const char* streamData, std::size_t length, const StreamDecoder::flate_params& params) {
-    std::shared_ptr<boost::iostreams::filtering_istream> decodeStream = std::make_shared<boost::iostreams::filtering_istream>();
-    decodeStream->push(predictor_reader({params.predictor, params.colors, params.bitsPerComponent, params.columns}, length));
-    decodeStream->push(boost::iostreams::zlib_decompressor{});
-    decodeStream->push(boost::iostreams::array_source{streamData, length});
+std::vector<char> StreamDecoder::decodeFilteredStream(const char* streamData, std::size_t length, const StreamDecoder::flate_params& params) {
+    boost::iostreams::filtering_istream decodeStream;
+    decodeStream.push(predictor_reader({params.predictor, params.colors, params.bitsPerComponent, params.columns}, length));
+    decodeStream.push(boost::iostreams::zlib_decompressor{});
+    decodeStream.push(boost::iostreams::array_source{streamData, length});
+
+    std::vector<char> outVector;
+    boost::iostreams::back_insert_device<std::vector<char>> outSink{outVector};
+    boost::iostreams::copy(decodeStream, outSink);
     
-    return decodeStream;
+    return outVector;
 }

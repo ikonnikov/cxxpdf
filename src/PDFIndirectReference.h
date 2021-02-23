@@ -4,13 +4,8 @@
 
 #pragma once
 
-#include <memory>
-#include <utility>
-
+#include "common.h"
 #include "PDFObject.h"
-
-class PDFIndirectReference;
-using PDFIndirectReferencePtr = std::shared_ptr<PDFIndirectReference>;
 
 class PDFIndirectReference : public virtual PDFObject {
  public:

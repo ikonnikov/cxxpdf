@@ -4,27 +4,10 @@
 
 #pragma once
 
-#include <algorithm>
-#include <memory>
-#include <string>
-#include <iterator>
-#include <istream>
-//#include <sstream>
-//#include <iostream>
-//#include <boost/iostreams/filtering_streambuf.hpp>
-//#include <boost/iostreams/filter/zlib.hpp>
-//#include <boost/iostreams/filter/gzip.hpp>
-//#include <boost/iostreams/copy.hpp>
-//#include <fstream>
-//#include <boost/iostreams/device/array.hpp>
-//#include <boost/iostreams/filtering_stream.hpp>
-
+#include "common.h"
 #include "PDFDictionary.h"
 #include "PDFNumber.h"
 #include "StreamDecoder.h"
-
-class PDFStream;
-using PDFStreamPtr = std::shared_ptr<PDFStream>;
 
 class PDFStream : public virtual PDFDictionary {
  public:
@@ -34,8 +17,7 @@ class PDFStream : public virtual PDFDictionary {
 
     std::size_t getLength() const override;
     void setRawStreamBytes(const char* bytes, std::size_t length);
-    //std::istream decodeFilteredStream() const;
-    std::shared_ptr<std::istream> decodeFilteredStream() const;
+    std::vector<char> decodeFilteredStream() const;
 
  protected:
      std::size_t m_length;

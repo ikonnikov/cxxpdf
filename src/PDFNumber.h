@@ -4,13 +4,8 @@
 
 #pragma once
 
-#include <variant>
-#include <memory>
-
+#include "common.h"
 #include "PDFObject.h"
-
-class PDFNumber;
-using PDFNumberPtr = std::shared_ptr<PDFNumber>;
 
 class PDFNumber : public virtual PDFObject {
  public:
@@ -20,6 +15,9 @@ class PDFNumber : public virtual PDFObject {
 
      std::size_t getLength() const override;
      const std::variant<std::int64_t, double> getValue() const;
+
+     std::int64_t asInteger(std::int64_t defaultValue = 0) const;
+     double asDouble(double defaultValue = 0.0) const;
 
  protected:
      std::variant<std::int64_t, double> m_value;

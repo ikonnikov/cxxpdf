@@ -4,14 +4,7 @@
 
 #pragma once
 
-#include <string>
-#include <fstream>
-#include <filesystem>
-#include <memory>
-#include <mutex>
-#include <boost/iostreams/device/file.hpp>
-#include <boost/iostreams/stream.hpp>
-
+#include "common.h"
 #include "XRef.h"
 #include "Tokeniser.h"
 
@@ -34,7 +27,7 @@ class PDFDoc {
      int getNumberOfPages() const;
 
  private:
-     void tokenize_document(boost::iostreams::stream<boost::iostreams::file_source>& pdfStreamData);
+     void tokenize_document(PDFFileStream& pdfStreamData);
 
  protected:
      mutable std::recursive_mutex m_mutex;

@@ -263,6 +263,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\common.h" />
     <ClInclude Include="src\PDFArray.h" />
     <ClInclude Include="src\PDFDictionary.h" />
     <ClInclude Include="src\PDFDoc.h" />

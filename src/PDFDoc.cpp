@@ -4,7 +4,7 @@
 
 #include "PDFDoc.h"
 
-PDFDoc::PDFDoc(const std::filesystem::path& filePath) : m_fileSize(0), m_pdfVersion{"", 0, 0 }, m_xref(nullptr) {
+PDFDoc::PDFDoc(const std::filesystem::path& filePath) : m_fileSize(0), m_pdfVersion{"", 0, 0}, m_xref(nullptr) {
     boost::iostreams::file_source pdfFileData(filePath.string(), std::ios::binary | std::ios::in);
     boost::iostreams::stream<boost::iostreams::file_source> pdfStreamData{pdfFileData};
 
@@ -21,7 +21,7 @@ PDFDoc::~PDFDoc() noexcept {
     // dtor
 }
 
-void PDFDoc::tokenize_document(boost::iostreams::stream<boost::iostreams::file_source>& pdfStreamData) {
+void PDFDoc::tokenize_document(PDFFileStream& pdfStreamData) {
     std::unique_lock<std::recursive_mutex> localLocker(m_mutex);
 
     TokeniserPtr documentTokeniser = std::make_shared<Tokeniser>(pdfStreamData, 0);

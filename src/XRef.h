@@ -4,12 +4,7 @@
 
 #pragma once
 
-#include <fstream>
-#include <mutex>
-#include <string>
-#include <memory>
-#include <utility>
-
+#include "common.h"
 #include "Tokeniser.h"
 #include "PDFObject.h"
 #include "PDFDictionary.h"
@@ -28,14 +23,15 @@ class XRef {
     virtual ~XRef() noexcept;
 
  private:
-    void read_xref(TokeniserPtr& documentTokeniser);
-    bool read_xref_stream(TokeniserPtr& documentTokeniser);
-    bool read_xref_section(TokeniserPtr& documentTokeniser);
+    void readXref(TokeniserPtr& documentTokeniser);
+    bool readXrefStream(TokeniserPtr& documentTokeniser);
+    bool readXrefSection(TokeniserPtr& documentTokeniser);
 
-    PDFObjectPtr read_object(TokeniserPtr& documentTokeniser);
-    PDFDictionaryPtr read_dictionary(TokeniserPtr& documentTokeniser);
-    PDFArrayPtr read_array(TokeniserPtr& documentTokeniser);
+    PDFObjectPtr readObject(TokeniserPtr& documentTokeniser);
+    PDFDictionaryPtr readDictionary(TokeniserPtr& documentTokeniser);
+    PDFArrayPtr readArray(TokeniserPtr& documentTokeniser);
 
- private:
+ protected:
     mutable std::recursive_mutex m_mutex;
+    std::vector<int> m_xrefTable;
 };

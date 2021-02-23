@@ -23,3 +23,21 @@ std::size_t PDFNumber::getLength() const {
 const std::variant<std::int64_t, double> PDFNumber::getValue() const {
     return m_value;
 }
+
+std::int64_t PDFNumber::asInteger(std::int64_t defaultValue) const {
+    if (!this->isInteger())
+        return defaultValue;
+
+    std::int64_t retValue = std::get<std::int64_t>(this->getValue());
+
+    return retValue;
+}
+
+double PDFNumber::asDouble(double defaultValue) const {
+    if (!this->isReal())
+        return defaultValue;
+
+    double retValue = std::get<double>(this->getValue());
+
+    return retValue;
+}

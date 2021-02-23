@@ -13,9 +13,35 @@ PDFArray::~PDFArray() {
 }
 
 std::size_t PDFArray::getLength() const {
+    return size();
+}
+
+std::size_t PDFArray::size() const {
     return m_value.size();
 }
 
 void PDFArray::add(const PDFObjectPtr pdfObject) {
     m_value.push_back(pdfObject);
+}
+
+const std::vector<PDFObjectPtr> PDFArray::getVector() const {
+    return m_value;
+}
+
+PDFObjectPtr& PDFArray::operator[](const std::size_t _Pos) noexcept {
+    return m_value[_Pos];
+}
+
+const PDFObjectPtr& PDFArray::operator[](const std::size_t _Pos) const noexcept {
+    return m_value[_Pos];
+}
+
+const std::vector<std::int64_t> PDFArray::getIntVector() const {
+    std::vector<std::int64_t> intVector;
+
+    for (PDFObjectPtr value : m_value) {
+        intVector.push_back(std::dynamic_pointer_cast<PDFNumber>(value)->asInteger(0));
+    }
+
+    return intVector;
 }

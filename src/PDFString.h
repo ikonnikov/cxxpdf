@@ -4,13 +4,8 @@
 
 #pragma once
 
-#include <string>
-#include <memory>
-
+#include "common.h"
 #include "PDFObject.h"
-
-class PDFString;
-using PDFStringPtr = std::shared_ptr<PDFString>;
 
 class PDFString : public virtual PDFObject {
  public:

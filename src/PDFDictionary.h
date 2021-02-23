@@ -4,16 +4,11 @@
 
 #pragma once
 
-#include <map>
-#include <utility>
-#include <memory>
-
+#include "common.h"
 #include "PDFObject.h"
 #include "PDFName.h"
 
-class PDFDictionary;
 using MapDict = std::map<const PDFNamePtr, const PDFObjectPtr, PDFName::cmpByStringName>;
-using PDFDictionaryPtr = std::shared_ptr<PDFDictionary>;
 
 class PDFDictionary : public virtual PDFObject {
  public:
@@ -24,6 +19,7 @@ class PDFDictionary : public virtual PDFObject {
     std::size_t getSize() const;
     void put(const PDFNamePtr& pdfName, const PDFObjectPtr pdfObject);
     const PDFObjectPtr get(const PDFNamePtr& pdfName) const;
+    const PDFObjectPtr get(const std::string& pdfName) const;
     const MapDict::const_iterator begin() const;
     const MapDict::const_iterator end() const;
 

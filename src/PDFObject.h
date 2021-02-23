@@ -4,11 +4,7 @@
 
 #pragma once
 
-#include <stdint.h>
-#include <memory>
-
-class PDFObject;
-using PDFObjectPtr = std::shared_ptr<PDFObject>;
+#include "common.h"
 
 class PDFObject {
  public:

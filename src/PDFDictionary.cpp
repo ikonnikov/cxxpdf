@@ -39,6 +39,10 @@ const PDFObjectPtr PDFDictionary::get(const PDFNamePtr& pdfName) const {
     return nullptr;
 }
 
+const PDFObjectPtr PDFDictionary::get(const std::string& pdfName) const {
+    return get(std::make_shared<PDFName>(pdfName));
+}
+
 const MapDict::const_iterator PDFDictionary::begin() const {
     return m_value.begin();
 }

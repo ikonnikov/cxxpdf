@@ -4,7 +4,7 @@
 
 #include "Tokeniser.h"
 
-Tokeniser::Tokeniser(boost::iostreams::stream<boost::iostreams::file_source>& pdfStream, std::streamoff startPos) : m_pdfStream(pdfStream), m_endStreamPos(-1) {
+Tokeniser::Tokeniser(PDFFileStream& pdfStream, std::streamoff startPos) : m_pdfStream(pdfStream), m_endStreamPos(-1) {
     m_pdfStream.seekg(0, std::ios_base::end);
     m_endStreamPos = m_pdfStream.tellg();
 

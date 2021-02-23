@@ -10,6 +10,7 @@
 #include <boost/iostreams/filter/zlib.hpp>
 #include <boost/iostreams/device/array.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
+#include <boost/iostreams/device/back_inserter.hpp>
 
 #include "PredictorFilter.hpp"
 
@@ -30,5 +31,5 @@ class StreamDecoder {
      };
 
  public:
-     static std::shared_ptr<std::istream> makeFlateDecodeStream(const char* streamData, std::size_t length, const StreamDecoder::flate_params& params);
+     static std::vector<char> decodeFilteredStream(const char* streamData, std::size_t length, const StreamDecoder::flate_params& params);
 };

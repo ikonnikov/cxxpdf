@@ -4,13 +4,9 @@
 
 #pragma once
 
-#include <vector>
-#include <memory>
-
+#include "common.h"
 #include "PDFObject.h"
-
-class PDFArray;
-using PDFArrayPtr = std::shared_ptr<PDFArray>;
+#include "PDFNumber.h"
 
 class PDFArray : public virtual PDFObject {
  public:
@@ -18,7 +14,14 @@ class PDFArray : public virtual PDFObject {
     virtual ~PDFArray() noexcept;
 
     std::size_t getLength() const override;
+    std::size_t size() const ;
     void add(PDFObjectPtr pdfObject);
+    const std::vector<PDFObjectPtr> getVector() const;
+
+    const std::vector<std::int64_t> getIntVector() const;
+
+    PDFObjectPtr& operator[](const std::size_t _Pos) noexcept;
+    const PDFObjectPtr& operator[](const std::size_t _Pos) const noexcept;
 
  protected:
     std::vector<PDFObjectPtr> m_value;

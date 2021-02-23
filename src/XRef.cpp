@@ -5,14 +5,16 @@
 #include "XRef.h"
 
 XRef::XRef(TokeniserPtr& documentTokeniser) {
-    read_xref(documentTokeniser);
+    m_xrefTable.clear();
+    
+    readXref(documentTokeniser);
 }
 
 XRef::~XRef() noexcept {
-    // dtor
+    m_xrefTable.clear();
 }
 
-void XRef::read_xref(TokeniserPtr& documentTokeniser) {
+void XRef::readXref(TokeniserPtr& documentTokeniser) {
     std::unique_lock<std::recursive_mutex> localLocker(m_mutex);
 
     std::streamoff startXrefPos = documentTokeniser->getStartXref(true);  // find startxref location and position there
@@ -31,7 +33,7 @@ void XRef::read_xref(TokeniserPtr& documentTokeniser) {
         auto [tokenValue, tokenType] = documentTokeniser->nextToken();  // read a numeric offset to a first located cross-reference table
 
         if (tokenType != Tokeniser::Types::kTK_NUMBER_INT)
-            throw std::exception("Failed to read a xref (startxref is not followed by a integer number)");
+            throw std::exception("Failed to read a xref (startxref is not followed by a number)");
 
         lastXrefPos = std::any_cast<std::int64_t>(tokenValue);
     }
@@ -40,14 +42,14 @@ void XRef::read_xref(TokeniserPtr& documentTokeniser) {
         return;
 
     documentTokeniser->seek(lastXrefPos);
-    if (!read_xref_stream(documentTokeniser))  // try to read a cross-reference stream (maybe a table)
+    if (!readXrefStream(documentTokeniser))  // try to read a cross-reference stream (maybe a table)
         return;
 
     int a = 1;  // todo: fuck it
 }
 
-bool XRef::read_xref_stream(TokeniserPtr& documentTokeniser) {
-    /* exmple:
+bool XRef::readXrefStream(TokeniserPtr& documentTokeniser) {
+    /* example:
     * 11 0 obj % 11 = number, 0 = generation
     * .....
     * endobj
@@ -85,30 +87,62 @@ bool XRef::read_xref_stream(TokeniserPtr& documentTokeniser) {
             return false;
     }
 
-    PDFObjectPtr pdfObject = read_object(documentTokeniser);
+    PDFObjectPtr pdfObject = readObject(documentTokeniser);
 
+    if (!pdfObject->isStream())
+        return false;
+
+    PDFStreamPtr pdfStream = std::dynamic_pointer_cast<PDFStream>(pdfObject);
+
+    const PDFObjectPtr wToken = pdfStream->get("W");
+
+    if (wToken == nullptr)
+        return false;
+
+    if (!wToken->isArray())
+        return false;
+
+    const std::vector<std::int64_t> wVector = std::dynamic_pointer_cast<PDFArray>(wToken)->getIntVector();
+
+    const PDFObjectPtr indexToken = pdfStream->get("Index");
+
+    if (indexToken == nullptr)
+        return false;
+
+    if (!indexToken->isArray())
+        return false;
+
+    const std::vector<std::int64_t> indexVector = std::dynamic_pointer_cast<PDFArray>(indexToken)->getIntVector();
+
+    const PDFObjectPtr prevToken = pdfStream->get("Prev");
+    
+    std::int64_t prev = -1;
+    if (prevToken != nullptr)
+        prev = std::dynamic_pointer_cast<PDFNumber>(prevToken)->asInteger(prev);
+
+    // std::vector<char> decodedData = pdfStream->decodeFilteredStream();
     // todo: read a stream too
 
     return false;  // todo
 }
 
-bool XRef::read_xref_section(TokeniserPtr& documentTokeniser) {
+bool XRef::readXrefSection(TokeniserPtr& documentTokeniser) {
     // m_documentTokeniser
     return false;  // todo: impl it
 }
 
-PDFObjectPtr XRef::read_object(TokeniserPtr& documentTokeniser) {
+PDFObjectPtr XRef::readObject(TokeniserPtr& documentTokeniser) {
     auto [tokenValue, tokenType] = documentTokeniser->nextValidToken();
 
     PDFObjectPtr pdfObject(nullptr);
 
     switch (tokenType) {
     case Tokeniser::Types::kTK_START_DIC:
-        pdfObject = read_dictionary(documentTokeniser);
+        pdfObject = readDictionary(documentTokeniser);
         break;
 
     case Tokeniser::Types::kTK_START_ARRAY:
-        pdfObject = read_array(documentTokeniser);
+        pdfObject = readArray(documentTokeniser);
         break;
 
     case Tokeniser::Types::kTK_NUMBER_INT:
@@ -154,7 +188,7 @@ PDFObjectPtr XRef::read_object(TokeniserPtr& documentTokeniser) {
     return pdfObject;
 }
 
-PDFDictionaryPtr XRef::read_dictionary(TokeniserPtr& documentTokeniser) {
+PDFDictionaryPtr XRef::readDictionary(TokeniserPtr& documentTokeniser) {
     PDFDictionaryPtr pdfDictionary = std::make_shared<PDFDictionary>();
     std::streamoff streamBegPos(-1);
 
@@ -190,7 +224,7 @@ PDFDictionaryPtr XRef::read_dictionary(TokeniserPtr& documentTokeniser) {
             throw std::exception("Failed to read a xref (dictionary key is not a name)");
         }
 
-        PDFObjectPtr pdfObject = read_object(documentTokeniser);
+        PDFObjectPtr pdfObject = readObject(documentTokeniser);
 
         if (pdfObject->isLiteral()) {
             PDFLiteralPtr pdfLiteral = std::dynamic_pointer_cast<PDFLiteral>(pdfObject);
@@ -234,7 +268,7 @@ PDFDictionaryPtr XRef::read_dictionary(TokeniserPtr& documentTokeniser) {
             documentTokeniser->skipWhitespaces();
             streamPos = documentTokeniser->tell();
 
-            PDFObjectPtr lengthToken = pdfDictionary->get(std::make_shared<PDFName>("Length"));
+            PDFObjectPtr lengthToken = pdfDictionary->get("Length");
 
             std::size_t length = 0;
             if (lengthToken->isInteger())
@@ -249,29 +283,17 @@ PDFDictionaryPtr XRef::read_dictionary(TokeniserPtr& documentTokeniser) {
                 throw std::exception("Failed to tokenize a document (start xref position didn't read)");
 
             pdfStream->setRawStreamBytes(buffer.c_str(), length);
-            std::shared_ptr<boost::iostreams::filtering_istream> decodedStream = std::dynamic_pointer_cast<boost::iostreams::filtering_istream>(pdfStream->decodeFilteredStream());
-
-            //TokeniserPtr streamTokeniser(decodedStream);
-            
-            // todo: for try
-            char buf[512];
-            ::memset(&buf[0], '\0', 512);
-
-            decodedStream->read(&buf[0], 512);
-            std::size_t read_size = decodedStream->gcount();
-
-            auto cc = 0;
         }
     }
 
     return pdfStream;
 }
 
-PDFArrayPtr XRef::read_array(TokeniserPtr& documentTokeniser) {
+PDFArrayPtr XRef::readArray(TokeniserPtr& documentTokeniser) {
     PDFArrayPtr pdfArray = std::make_shared<PDFArray>();
 
     while (true) {
-        PDFObjectPtr pdfObject = read_object(documentTokeniser);
+        PDFObjectPtr pdfObject = readObject(documentTokeniser);
 
         if (pdfObject->isLiteral()) {
             PDFLiteralPtr pdfLiteral = std::dynamic_pointer_cast<PDFLiteral>(pdfObject);

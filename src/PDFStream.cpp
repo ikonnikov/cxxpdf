@@ -28,9 +28,9 @@ void PDFStream::setRawStreamBytes(const char* bytes, std::size_t length) {
     m_length = length;
 }
 
-std::shared_ptr<std::istream> PDFStream::decodeFilteredStream() const {
+std::vector<char> PDFStream::decodeFilteredStream() const {
     // todo: enum filters and get decode params (Predictor, Colors, BitsPerComponent, Columns)
-    PDFObjectPtr decodeParmsToken = this->get(std::make_shared<PDFName>("DecodeParms"));
+    PDFObjectPtr decodeParmsToken = get("DecodeParms");
 
     std::int64_t predictor = 1;
     std::int64_t colors = 1;
@@ -39,37 +39,37 @@ std::shared_ptr<std::istream> PDFStream::decodeFilteredStream() const {
 
     if (decodeParmsToken != nullptr) {
         if (decodeParmsToken->isDictionary()) {
-            const PDFObjectPtr predictorToken = std::dynamic_pointer_cast<PDFDictionary>(decodeParmsToken)->get(std::make_shared<PDFName>("Predictor"));
+            PDFDictionaryPtr decodeDictionaryToken = std::dynamic_pointer_cast<PDFDictionary>(decodeParmsToken);
+
+            const PDFObjectPtr predictorToken = decodeDictionaryToken->get("Predictor");
 
             if (predictorToken != nullptr) {
-                if (predictorToken->isInteger())
-                    predictor = std::get<std::int64_t>(std::dynamic_pointer_cast<PDFNumber>(predictorToken)->getValue());
+                predictor = std::dynamic_pointer_cast<PDFNumber>(predictorToken)->asInteger(predictor);
             }
 
-            const PDFObjectPtr colorsToken = std::dynamic_pointer_cast<PDFDictionary>(decodeParmsToken)->get(std::make_shared<PDFName>("Colors"));
+            const PDFObjectPtr colorsToken = decodeDictionaryToken->get("Colors");
 
             if (colorsToken != nullptr) {
-                if (colorsToken->isInteger())
-                    colors = std::get<std::int64_t>(std::dynamic_pointer_cast<PDFNumber>(colorsToken)->getValue());
+                colors = std::dynamic_pointer_cast<PDFNumber>(colorsToken)->asInteger(colors);
             }
 
-            const PDFObjectPtr bitsPerComponentToken = std::dynamic_pointer_cast<PDFDictionary>(decodeParmsToken)->get(std::make_shared<PDFName>("BitsPerComponent"));
+            const PDFObjectPtr bitsPerComponentToken = decodeDictionaryToken->get("BitsPerComponent");
 
             if (bitsPerComponentToken != nullptr) {
-                if (bitsPerComponentToken->isInteger())
-                    bitsPerComponent = std::get<std::int64_t>(std::dynamic_pointer_cast<PDFNumber>(bitsPerComponentToken)->getValue());
+                bitsPerComponent = std::dynamic_pointer_cast<PDFNumber>(bitsPerComponentToken)->asInteger(bitsPerComponent);
             }
 
-            const PDFObjectPtr columnsToken = std::dynamic_pointer_cast<PDFDictionary>(decodeParmsToken)->get(std::make_shared<PDFName>("Columns"));
+            const PDFObjectPtr columnsToken = decodeDictionaryToken->get("Columns");
 
             if (columnsToken != nullptr) {
-                if (columnsToken->isInteger())
-                    columns = std::get<std::int64_t>(std::dynamic_pointer_cast<PDFNumber>(columnsToken)->getValue());
+                columns = std::dynamic_pointer_cast<PDFNumber>(columnsToken)->asInteger(columns);
             }
         }
     }
 
-    return StreamDecoder::makeFlateDecodeStream(m_streamData, m_length, {predictor, colors, bitsPerComponent, columns});
+    return StreamDecoder::decodeFilteredStream(m_streamData, m_length, {predictor, colors, bitsPerComponent, columns});
+
+    //return StreamDecoder::makeFlateDecodeStream(m_streamData, m_length, {predictor, colors, bitsPerComponent, columns});
 
     // todo: delete below
 
@@ -118,5 +118,5 @@ std::shared_ptr<std::istream> PDFStream::decodeFilteredStream() const {
     //std::istream stream;
     //(m_streamData);
     
-    return nullptr;
+    //return nullptr;
 }

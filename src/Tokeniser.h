@@ -4,19 +4,7 @@
 
 #pragma once
 
-#include <fstream>
-#include <any>
-#include <utility>
-#include <string>
-#include <memory>
-#include <sstream>
-#include <iostream>  // todo: delete it
-#include <boost/lexical_cast.hpp>
-#include <boost/iostreams/device/file.hpp>
-#include <boost/iostreams/stream.hpp>
-
-class Tokeniser;
-using TokeniserPtr = std::shared_ptr<Tokeniser>;
+#include "common.h"
 
 constexpr std::int64_t kDEFAULT_BUF_SIZE(1024);  // size of buffer
 constexpr const char* kPDF_VERSION_TOKEN("%PDF-");
@@ -63,7 +51,7 @@ class Tokeniser {
 
  public:
      Tokeniser() = delete;
-     explicit Tokeniser(boost::iostreams::stream<boost::iostreams::file_source>& pdfStream, std::streamoff startPos = 0);
+     explicit Tokeniser(PDFFileStream& pdfStream, std::streamoff startPos = 0);
      virtual ~Tokeniser() noexcept;
 
      void seek(std::streamoff pos) const;
@@ -83,7 +71,7 @@ class Tokeniser {
      char skipWhitespaces(const char currentChar) const;
      char skipWhitespaces() const;
 
- private:
-     boost::iostreams::stream<boost::iostreams::file_source>& m_pdfStream;
+ protected:
+     PDFFileStream& m_pdfStream;
      std::streamoff m_endStreamPos;
 };

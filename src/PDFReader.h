@@ -4,10 +4,7 @@
 
 #pragma once
 
-#include <string>
-#include <filesystem>
-#include <memory>
-
+#include "common.h"
 #include "PDFDoc.h"
 
 class PDFReader {
