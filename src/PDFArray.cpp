@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2020 cxxPDF project, Ikonnikov Kirill, All rights reserved.
+﻿// Copyright (c) 2020-2021 cxxPDF project, Ikonnikov Kirill, All rights reserved.
 //
 // Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
 
@@ -40,6 +40,9 @@ const std::vector<std::int64_t> PDFArray::getIntVector() const {
     std::vector<std::int64_t> intVector;
 
     for (PDFObjectPtr value : m_value) {
+        if (!value->isInteger())
+            continue;
+
         intVector.push_back(std::dynamic_pointer_cast<PDFNumber>(value)->asInteger(0));
     }
 

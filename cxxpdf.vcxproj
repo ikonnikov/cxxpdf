@@ -253,6 +253,7 @@
     </ClCompile>
     <ClCompile Include="src\Tokeniser.cpp" />
     <ClCompile Include="src\XRef.cpp" />
+    <ClCompile Include="test\DecodeTest.cpp" />
     <ClCompile Include="test\SpecTests.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug unit-tests|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -269,6 +270,7 @@
     <ClInclude Include="src\PDFDoc.h" />
     <ClInclude Include="src\PDFIndirectReference.h" />
     <ClInclude Include="src\PDFLiteral.h" />
+    <ClInclude Include="src\PDFMutator.hpp" />
     <ClInclude Include="src\PDFName.h" />
     <ClInclude Include="src\PDFNumber.h" />
     <ClInclude Include="src\PDFObject.h" />

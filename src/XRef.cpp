@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2020 cxxPDF project, Ikonnikov Kirill, All rights reserved.
+﻿// Copyright (c) 2020-2021 cxxPDF project, Ikonnikov Kirill, All rights reserved.
 //
 // Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
 
@@ -7,22 +7,22 @@
 XRef::XRef(TokeniserPtr& documentTokeniser) {
     m_xrefTable.clear();
     
-    readXref(documentTokeniser);
+    readXRef(*documentTokeniser.get());
 }
 
 XRef::~XRef() noexcept {
     m_xrefTable.clear();
 }
 
-void XRef::readXref(TokeniserPtr& documentTokeniser) {
+void XRef::readXRef(Tokeniser& documentTokeniser) {
     std::unique_lock<std::recursive_mutex> localLocker(m_mutex);
 
-    std::streamoff startXrefPos = documentTokeniser->getStartXref(true);  // find startxref location and position there
+    std::streamoff startXrefPos = documentTokeniser.getStartXref(true);  // find startxref location and position there
     if (startXrefPos == std::streamoff(-1))
         throw std::exception("Failed to read a xref (startxref position don't found)");
 
     {
-        auto [tokenValue, tokenType] = documentTokeniser->nextToken();  // read a startxref-token
+        auto [tokenValue, tokenType] = documentTokeniser.nextToken();  // read a startxref-token
 
         if (!(tokenType == Tokeniser::Types::kTK_OTHER && std::any_cast<std::string>(tokenValue) == "startxref"))
             throw std::exception("Failed to read a xref (startxref don't found)");
@@ -30,7 +30,7 @@ void XRef::readXref(TokeniserPtr& documentTokeniser) {
 
     std::int64_t lastXrefPos = -1;
     {
-        auto [tokenValue, tokenType] = documentTokeniser->nextToken();  // read a numeric offset to a first located cross-reference table
+        auto [tokenValue, tokenType] = documentTokeniser.nextToken();  // read a numeric offset to a first located cross-reference table
 
         if (tokenType != Tokeniser::Types::kTK_NUMBER_INT)
             throw std::exception("Failed to read a xref (startxref is not followed by a number)");
@@ -41,14 +41,13 @@ void XRef::readXref(TokeniserPtr& documentTokeniser) {
     if (lastXrefPos == -1)
         return;
 
-    documentTokeniser->seek(lastXrefPos);
-    if (!readXrefStream(documentTokeniser))  // try to read a cross-reference stream (maybe a table)
+    if (!readXRefStream(documentTokeniser.seek(lastXrefPos)))  // try to read a cross-reference stream (maybe a table)
         return;
 
     int a = 1;  // todo: fuck it
 }
 
-bool XRef::readXrefStream(TokeniserPtr& documentTokeniser) {
+bool XRef::readXRefStream(Tokeniser& documentTokeniser) {  //bool XRef::readXRefStream(TokeniserPtr& documentTokeniser) {
     /* example:
     * 11 0 obj % 11 = number, 0 = generation
     * .....
@@ -56,7 +55,7 @@ bool XRef::readXrefStream(TokeniserPtr& documentTokeniser) {
     */
     std::int64_t xrefObjectNumber = -1;
     {
-        auto [tokenValue, tokenType] = documentTokeniser->nextToken();  // read begin of cross-reference stream - Number of object
+        auto [tokenValue, tokenType] = documentTokeniser.nextToken();  // read begin of cross-reference stream - Number of object
 
         if (tokenType != Tokeniser::Types::kTK_NUMBER_INT)
             return false;  // not stream! Looks like a cross-reference table
@@ -69,7 +68,7 @@ bool XRef::readXrefStream(TokeniserPtr& documentTokeniser) {
 
     std::int64_t xrefGenNumber = -1;
     {
-        auto [tokenValue, tokenType] = documentTokeniser->nextToken();  // read a generation of object
+        auto [tokenValue, tokenType] = documentTokeniser.nextToken();  // read a generation of object
 
         if (tokenType != Tokeniser::Types::kTK_NUMBER_INT)
             return false;
@@ -81,7 +80,7 @@ bool XRef::readXrefStream(TokeniserPtr& documentTokeniser) {
         return false;
 
     {
-        auto [tokenValue, tokenType] = documentTokeniser->nextToken();  // read a obj-token
+        auto [tokenValue, tokenType] = documentTokeniser.nextToken();  // read a obj-token
 
         if (!(tokenType == Tokeniser::Types::kTK_OTHER && std::any_cast<std::string>(tokenValue) == "obj"))
             return false;
@@ -94,45 +93,71 @@ bool XRef::readXrefStream(TokeniserPtr& documentTokeniser) {
 
     PDFStreamPtr pdfStream = std::dynamic_pointer_cast<PDFStream>(pdfObject);
 
-    const PDFObjectPtr wToken = pdfStream->get("W");
+    std::int64_t prev = PDFMutator::xcast<PDFNumber>(pdfStream->get("Prev"))->asInteger(-1);
+    std::int64_t size = PDFMutator::xcast<PDFNumber>(pdfStream->get("Size"))->asInteger(0);
+    const std::vector<std::int64_t> vectorW = PDFMutator::xcast<PDFArray>(pdfStream->get("W"))->getIntVector();
+    std::vector<std::int64_t> vectorIndex = PDFMutator::xcast<PDFArray>(pdfStream->get("Index"))->getIntVector();
 
-    if (wToken == nullptr)
-        return false;
+    if (vectorIndex.empty())
+        vectorIndex = {0, size};
 
-    if (!wToken->isArray())
-        return false;
+    std::vector<char> decodedData = pdfStream->decodeFilteredStream();
+    std::size_t bptr = 0;
 
-    const std::vector<std::int64_t> wVector = std::dynamic_pointer_cast<PDFArray>(wToken)->getIntVector();
+    for (std::size_t idx = 0; idx < vectorIndex.size(); idx += 2) {
+        std::int64_t start = vectorIndex[idx];
+        std::int64_t length = vectorIndex[idx + 1];
 
-    const PDFObjectPtr indexToken = pdfStream->get("Index");
+        while (length-- > 0) {
+            std::int64_t type = 1;
+            if (vectorW[0] > 0) {
+                type = 0;
 
-    if (indexToken == nullptr)
-        return false;
+                for (std::int64_t k = 0; k < vectorW[0]; ++k)
+                    type = (type << 8) + (decodedData[bptr++] & 0xff);
+            }
 
-    if (!indexToken->isArray())
-        return false;
+            std::int64_t field2 = 0;
+            for (std::int64_t k = 0; k < vectorW[1]; ++k)
+                field2 = (field2 << 8) + (decodedData[bptr++] & 0xff);
 
-    const std::vector<std::int64_t> indexVector = std::dynamic_pointer_cast<PDFArray>(indexToken)->getIntVector();
+            std::int64_t field3 = 0;
+            for (std::int64_t k = 0; k < vectorW[2]; ++k)
+                field3 = (field3 << 8) + (decodedData[bptr++] & 0xff);
 
-    const PDFObjectPtr prevToken = pdfStream->get("Prev");
-    
-    std::int64_t prev = -1;
-    if (prevToken != nullptr)
-        prev = std::dynamic_pointer_cast<PDFNumber>(prevToken)->asInteger(prev);
+            switch (type) {
+            case 0:
+                m_xrefTable[start] = std::make_tuple(-1, 0);
+                break;
+            case 1:
+                m_xrefTable[start] = std::make_tuple(field2, 0);
+                break;
+            case 2:
+                m_xrefTable[start] = std::make_tuple(field3, field2);
+                break;
+            default:
+                break;
+            }
 
-    // std::vector<char> decodedData = pdfStream->decodeFilteredStream();
-    // todo: read a stream too
+            ++start;
+        }
+    }
 
-    return false;  // todo
+    m_xrefTable[xrefObjectNumber] = std::make_tuple(-1, 0);
+
+    if (prev == -1)
+        return true;
+
+    return readXRefStream(documentTokeniser.seek(prev));
 }
 
-bool XRef::readXrefSection(TokeniserPtr& documentTokeniser) {
+bool XRef::readXRefSection(Tokeniser& documentTokeniser) {
     // m_documentTokeniser
     return false;  // todo: impl it
 }
 
-PDFObjectPtr XRef::readObject(TokeniserPtr& documentTokeniser) {
-    auto [tokenValue, tokenType] = documentTokeniser->nextValidToken();
+PDFObjectPtr XRef::readObject(Tokeniser& documentTokeniser) {
+    auto [tokenValue, tokenType] = documentTokeniser.nextValidToken();
 
     PDFObjectPtr pdfObject(nullptr);
 
@@ -188,12 +213,12 @@ PDFObjectPtr XRef::readObject(TokeniserPtr& documentTokeniser) {
     return pdfObject;
 }
 
-PDFDictionaryPtr XRef::readDictionary(TokeniserPtr& documentTokeniser) {
+PDFDictionaryPtr XRef::readDictionary(Tokeniser& documentTokeniser) {
     PDFDictionaryPtr pdfDictionary = std::make_shared<PDFDictionary>();
     std::streamoff streamBegPos(-1);
 
     while (true) {
-        auto [tokenValue, tokenType] = documentTokeniser->nextValidToken();
+        auto [tokenValue, tokenType] = documentTokeniser.nextValidToken();
 
         if (tokenType == Tokeniser::Types::kTK_COMMENT) {
             continue;
@@ -202,11 +227,11 @@ PDFDictionaryPtr XRef::readDictionary(TokeniserPtr& documentTokeniser) {
             break;
 
         } else if (tokenType == Tokeniser::Types::kTK_END_DIC) {
-            std::streamoff dictEndPos = documentTokeniser->tell();
+            std::streamoff dictEndPos = documentTokeniser.tell();
 
             // let's look at the next token
             while (true) {
-                auto [nextTokenValue, nextTokenType] = documentTokeniser->nextValidToken();
+                auto [nextTokenValue, nextTokenType] = documentTokeniser.nextValidToken();
 
                 if (nextTokenType == Tokeniser::Types::kTK_COMMENT)
                     continue;
@@ -217,7 +242,7 @@ PDFDictionaryPtr XRef::readDictionary(TokeniserPtr& documentTokeniser) {
 
                 break;
             }
-            documentTokeniser->seek(dictEndPos);  // rewind to end of dict
+            documentTokeniser.seek(dictEndPos);  // rewind to end of dict
             break;
 
         } else if (tokenType != Tokeniser::Types::kTK_NAME) {
@@ -253,7 +278,7 @@ PDFDictionaryPtr XRef::readDictionary(TokeniserPtr& documentTokeniser) {
     std::streamoff streamPos(-1);
 
     while (true) {
-        auto [tokenValue, tokenType] = documentTokeniser->nextValidToken();
+        auto [tokenValue, tokenType] = documentTokeniser.nextValidToken();
 
         if (tokenType == Tokeniser::Types::kTK_COMMENT)
             continue;
@@ -265,8 +290,8 @@ PDFDictionaryPtr XRef::readDictionary(TokeniserPtr& documentTokeniser) {
             break;
 
         if (std::any_cast<std::string>(tokenValue) == "stream") {
-            documentTokeniser->skipWhitespaces();
-            streamPos = documentTokeniser->tell();
+            documentTokeniser.skipWhitespaces();
+            streamPos = documentTokeniser.tell();
 
             PDFObjectPtr lengthToken = pdfDictionary->get("Length");
 
@@ -279,7 +304,7 @@ PDFDictionaryPtr XRef::readDictionary(TokeniserPtr& documentTokeniser) {
             }
 
             std::string buffer(length, '\0');
-            if (!documentTokeniser->readStream(buffer, length))
+            if (!documentTokeniser.readStream(buffer, length))
                 throw std::exception("Failed to tokenize a document (start xref position didn't read)");
 
             pdfStream->setRawStreamBytes(buffer.c_str(), length);
@@ -289,7 +314,7 @@ PDFDictionaryPtr XRef::readDictionary(TokeniserPtr& documentTokeniser) {
     return pdfStream;
 }
 
-PDFArrayPtr XRef::readArray(TokeniserPtr& documentTokeniser) {
+PDFArrayPtr XRef::readArray(Tokeniser& documentTokeniser) {
     PDFArrayPtr pdfArray = std::make_shared<PDFArray>();
 
     while (true) {

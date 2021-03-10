@@ -15,6 +15,7 @@
 #include "PDFIndirectReference.h"
 #include "PDFStream.h"
 #include "PDFNumber.h"
+#include "PDFMutator.hpp"
 
 class XRef {
  public:
@@ -23,15 +24,15 @@ class XRef {
     virtual ~XRef() noexcept;
 
  private:
-    void readXref(TokeniserPtr& documentTokeniser);
-    bool readXrefStream(TokeniserPtr& documentTokeniser);
-    bool readXrefSection(TokeniserPtr& documentTokeniser);
+    void readXRef(Tokeniser& documentTokeniser);
+    bool readXRefStream(Tokeniser& documentTokeniser);
+    bool readXRefSection(Tokeniser& documentTokeniser);
 
-    PDFObjectPtr readObject(TokeniserPtr& documentTokeniser);
-    PDFDictionaryPtr readDictionary(TokeniserPtr& documentTokeniser);
-    PDFArrayPtr readArray(TokeniserPtr& documentTokeniser);
+    PDFObjectPtr readObject(Tokeniser& documentTokeniser);
+    PDFDictionaryPtr readDictionary(Tokeniser& documentTokeniser);
+    PDFArrayPtr readArray(Tokeniser& documentTokeniser);
 
  protected:
     mutable std::recursive_mutex m_mutex;
-    std::vector<int> m_xrefTable;
+    std::map<std::int64_t, std::tuple<std::int64_t, std::int64_t>> m_xrefTable;
 };

@@ -54,6 +54,7 @@ class Tokeniser {
      explicit Tokeniser(PDFFileStream& pdfStream, std::streamoff startPos = 0);
      virtual ~Tokeniser() noexcept;
 
+     Tokeniser& seek(std::streamoff pos);
      void seek(std::streamoff pos) const;
      std::streamoff tell() const;
      void backOnePosition() const;

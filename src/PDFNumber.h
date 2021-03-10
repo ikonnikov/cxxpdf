@@ -11,6 +11,7 @@ class PDFNumber : public virtual PDFObject {
  public:
      explicit PDFNumber(std::int64_t intValue);
      explicit PDFNumber(double realValue);
+     PDFNumber();
      virtual ~PDFNumber() noexcept;
 
      std::size_t getLength() const override;

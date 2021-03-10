@@ -22,7 +22,6 @@ bool predictor_base::predictorDecodeImpl(const char*& begin_in, const char* end_
 
     std::size_t rowLength = (m_colors * m_bitsPerComponent * m_columns + 7) / 8;
     std::size_t pixelLength = m_colors * m_bitsPerComponent / 8;
-    std::size_t readedCount = 0;
 
     std::vector<char> bufferCurr(rowLength);
     std::vector<char> bufferPrev(rowLength);
@@ -32,8 +31,8 @@ bool predictor_base::predictorDecodeImpl(const char*& begin_in, const char* end_
         if (!src_stream.read((char*)&filterType, 1))
             return false;
 
-        readedCount = src_stream.gcount();
-        begin_in += readedCount;
+        std::size_t counter = src_stream.gcount();
+        begin_in += counter;
 
         if (filterType < 0)
             return false;
@@ -41,8 +40,8 @@ bool predictor_base::predictorDecodeImpl(const char*& begin_in, const char* end_
         if (!src_stream.read(&bufferCurr[0], rowLength))
             return false;
 
-        readedCount = src_stream.gcount();
-        begin_in += readedCount;
+        counter = src_stream.gcount();
+        begin_in += counter;
         
         switch (filterType) {
             case 0:  // PNG_FILTER_NONE
@@ -71,8 +70,8 @@ bool predictor_base::predictorDecodeImpl(const char*& begin_in, const char* end_
                 break;
         }
 
-        dst_stream.write(&bufferCurr[0], readedCount);
-        begin_out += readedCount;
+        dst_stream.write(&bufferCurr[0], counter);
+        begin_out += counter;
 
         bufferPrev = bufferCurr;
     }

@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2020 cxxPDF project, Ikonnikov Kirill, All rights reserved.
+﻿// Copyright (c) 2020-2021 cxxPDF project, Ikonnikov Kirill, All rights reserved.
 //
 // Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
 
@@ -30,42 +30,13 @@ void PDFStream::setRawStreamBytes(const char* bytes, std::size_t length) {
 
 std::vector<char> PDFStream::decodeFilteredStream() const {
     // todo: enum filters and get decode params (Predictor, Colors, BitsPerComponent, Columns)
-    PDFObjectPtr decodeParmsToken = get("DecodeParms");
+    
+    const PDFDictionaryPtr decodeDictionaryToken = PDFMutator::xcast<PDFDictionary>(get("DecodeParms"));
 
-    std::int64_t predictor = 1;
-    std::int64_t colors = 1;
-    std::int64_t bitsPerComponent = 8;
-    std::int64_t columns = 1;
-
-    if (decodeParmsToken != nullptr) {
-        if (decodeParmsToken->isDictionary()) {
-            PDFDictionaryPtr decodeDictionaryToken = std::dynamic_pointer_cast<PDFDictionary>(decodeParmsToken);
-
-            const PDFObjectPtr predictorToken = decodeDictionaryToken->get("Predictor");
-
-            if (predictorToken != nullptr) {
-                predictor = std::dynamic_pointer_cast<PDFNumber>(predictorToken)->asInteger(predictor);
-            }
-
-            const PDFObjectPtr colorsToken = decodeDictionaryToken->get("Colors");
-
-            if (colorsToken != nullptr) {
-                colors = std::dynamic_pointer_cast<PDFNumber>(colorsToken)->asInteger(colors);
-            }
-
-            const PDFObjectPtr bitsPerComponentToken = decodeDictionaryToken->get("BitsPerComponent");
-
-            if (bitsPerComponentToken != nullptr) {
-                bitsPerComponent = std::dynamic_pointer_cast<PDFNumber>(bitsPerComponentToken)->asInteger(bitsPerComponent);
-            }
-
-            const PDFObjectPtr columnsToken = decodeDictionaryToken->get("Columns");
-
-            if (columnsToken != nullptr) {
-                columns = std::dynamic_pointer_cast<PDFNumber>(columnsToken)->asInteger(columns);
-            }
-        }
-    }
+    std::int64_t predictor = PDFMutator::xcast<PDFNumber>(decodeDictionaryToken->get("Predictor"))->asInteger(1);
+    std::int64_t colors = PDFMutator::xcast<PDFNumber>(decodeDictionaryToken->get("Colors"))->asInteger(1);
+    std::int64_t bitsPerComponent = PDFMutator::xcast<PDFNumber>(decodeDictionaryToken->get("BitsPerComponent"))->asInteger(8);
+    std::int64_t columns = PDFMutator::xcast<PDFNumber>(decodeDictionaryToken->get("Columns"))->asInteger(1);
 
     return StreamDecoder::decodeFilteredStream(m_streamData, m_length, {predictor, colors, bitsPerComponent, columns});
 

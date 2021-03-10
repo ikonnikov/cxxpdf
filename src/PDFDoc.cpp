@@ -42,5 +42,5 @@ std::uintmax_t PDFDoc::getFileSize() const {
 }
 
 int PDFDoc::getNumberOfPages() const {
-    return 0;  // todo: impl it
+    throw std::exception("Not Implemented");  // return 0;  // todo: impl it
 }

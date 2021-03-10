@@ -12,6 +12,10 @@ PDFNumber::PDFNumber(double realValue) : m_value(realValue) {
     this->m_type = PDFObject::Types::kNUMBER_REAL;
 }
 
+PDFNumber::PDFNumber() {
+    this->m_type = PDFObject::Types::kNA;
+}
+
 PDFNumber::~PDFNumber() {
     // dtor
 }

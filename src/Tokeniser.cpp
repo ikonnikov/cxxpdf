@@ -93,6 +93,12 @@ std::streamoff Tokeniser::getStartXref(bool andLocate) const {
     return seekedPos;
 }
 
+Tokeniser& Tokeniser::seek(std::streamoff newPos) {
+    m_pdfStream.seekg(newPos);
+
+    return *this;
+}
+
 void Tokeniser::seek(std::streamoff newPos) const {
     m_pdfStream.seekg(newPos);
 }

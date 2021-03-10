@@ -6,7 +6,7 @@
 
 std::vector<char> StreamDecoder::decodeFilteredStream(const char* streamData, std::size_t length, const StreamDecoder::flate_params& params) {
     boost::iostreams::filtering_istream decodeStream;
-    decodeStream.push(predictor_reader({params.predictor, params.colors, params.bitsPerComponent, params.columns}, length));
+    decodeStream.push(predictor_reader({params.predictor, params.colors, params.bitsPerComponent, params.columns}));
     decodeStream.push(boost::iostreams::zlib_decompressor{});
     decodeStream.push(boost::iostreams::array_source{streamData, length});
 

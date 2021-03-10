@@ -74,6 +74,9 @@
     <ClCompile Include="src\PredictorFilter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="test\DecodeTest.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\PDFDoc.h">
@@ -122,6 +125,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PDFMutator.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

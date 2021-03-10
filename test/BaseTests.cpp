@@ -8,9 +8,9 @@
 #include <memory>
 #include "..\src\PDFReader.h"
 
-BOOST_AUTO_TEST_SUITE(BaseSuite)
+BOOST_AUTO_TEST_SUITE(BaseSuite, *boost::unit_test::enabled())
 
-BOOST_AUTO_TEST_CASE(MinimalPage_details, * boost::unit_test::disabled()) {
+BOOST_AUTO_TEST_CASE(MinimalPage_details, *boost::unit_test::disabled()) {
 	std::string filename(".//test//resources//minimal.pdf");
 
 	std::unique_ptr<PDFReader> pdfReader = std::make_unique<PDFReader>(filename);
@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE(MinimalPage_details, * boost::unit_test::disabled()) {
 	//BOOST_TEST(count == 1, "file contains one page only");
 }
 
-BOOST_AUTO_TEST_CASE(EmptyPage_details, * boost::unit_test::enabled()) {
+BOOST_AUTO_TEST_CASE(EmptyPage_details, *boost::unit_test::enabled()) {
 	std::string filename(".//test//resources//empty_page.pdf");
 
 	std::unique_ptr<PDFReader> pdfReader = std::make_unique<PDFReader>(filename);
@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(EmptyPage_details, * boost::unit_test::enabled()) {
 	std::string pdfVersion = pdfDocument->getPDFVersion(&major, &minor);
 
 	std::uintmax_t pdfFileSize = pdfDocument->getFileSize();
-	int count = pdfDocument->getNumberOfPages();
+	//int count = pdfDocument->getNumberOfPages();
 
 	BOOST_TEST(pdfVersion == "1.6", "wrong pdf-version");
 	BOOST_TEST(major == 1);
