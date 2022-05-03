@@ -19,3 +19,7 @@ std::size_t PDFName::getLength() const {
 const std::string PDFName::getName() const {
     return m_value;
 }
+
+bool PDFName::equal(const std::string& cmpString) const {
+    return 0 == m_value.compare(cmpString);
+}

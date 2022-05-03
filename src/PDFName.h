@@ -14,6 +14,7 @@ class PDFName : public virtual PDFObject {
 
      std::size_t getLength() const override;
      const std::string getName() const;
+     bool equal(const std::string& cmpString) const;
 
  public:
     struct cmpByStringName {
