@@ -1,12 +1,12 @@
-﻿// Copyright (c) 2020 cxxPDF project, Ikonnikov Kirill, All rights reserved.
+﻿// Copyright (c) 2023 cxxPDF project, Ikonnikov Kirill, All rights reserved.
 //
 // Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
 
 #pragma once
 
 #include "common.h"
-#include "XRef.h"
-#include "Tokeniser.h"
+#include "XRef.hpp"
+#include "Tokeniser.hpp"
 
 class PDFDoc {
  private:
@@ -27,7 +27,8 @@ class PDFDoc {
      int getNumberOfPages() const;
 
  private:
-     void tokenize_document(PDFFileStream& pdfStreamData);
+     void tokenize_document(PDFFileStream& pdfFileStream);
+     void tokenize_document(PDFArrayStream& pdfArrayStream);
 
  protected:
      mutable std::recursive_mutex m_mutex;

@@ -20,9 +20,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="test\BaseTests.cpp">
-      <Filter>test</Filter>
-    </ClCompile>
     <ClCompile Include="src\example.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -77,6 +74,9 @@
     <ClCompile Include="test\DecodeTest.cpp">
       <Filter>test</Filter>
     </ClCompile>
+    <ClCompile Include="test\BaseTests.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\PDFDoc.h">
@@ -88,10 +88,10 @@
     <ClInclude Include="src\PDFReader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Tokeniser.h">
+    <ClInclude Include="src\Tokeniser.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\XRef.h">
+    <ClInclude Include="src\XRef.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\PDFDictionary.h">

@@ -1,4 +1,4 @@
-// Copyright (c) 2020 cxxPDF project, Ikonnikov Kirill, All rights reserved.
+// Copyright (c) 2023 cxxPDF project, Ikonnikov Kirill, All rights reserved.
 //
 // Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
 
@@ -43,3 +43,4 @@ using PDFStreamPtr = std::shared_ptr<PDFStream>;
 using PDFStringPtr = std::shared_ptr<PDFString>;
 
 using PDFFileStream = boost::iostreams::stream<boost::iostreams::file_source>;
+using PDFArrayStream = boost::iostreams::stream<boost::iostreams::array_source>;

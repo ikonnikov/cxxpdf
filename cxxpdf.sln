@@ -7,22 +7,16 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cxxpdf", "cxxpdf.vcxproj", 
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug unit-tests|x64 = Debug unit-tests|x64
-		Debug unit-tests|x86 = Debug unit-tests|x86
-		Debug|x64 = Debug|x64
-		Debug|x86 = Debug|x86
+		DebugUT|x64 = DebugUT|x64
+		DebugUT|x86 = DebugUT|x86
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{4E2F6569-0FD8-48F1-8B1E-595DBED35375}.Debug unit-tests|x64.ActiveCfg = Debug unit-tests|x64
-		{4E2F6569-0FD8-48F1-8B1E-595DBED35375}.Debug unit-tests|x64.Build.0 = Debug unit-tests|x64
-		{4E2F6569-0FD8-48F1-8B1E-595DBED35375}.Debug unit-tests|x86.ActiveCfg = Debug unit-tests|Win32
-		{4E2F6569-0FD8-48F1-8B1E-595DBED35375}.Debug unit-tests|x86.Build.0 = Debug unit-tests|Win32
-		{4E2F6569-0FD8-48F1-8B1E-595DBED35375}.Debug|x64.ActiveCfg = Debug|x64
-		{4E2F6569-0FD8-48F1-8B1E-595DBED35375}.Debug|x64.Build.0 = Debug|x64
-		{4E2F6569-0FD8-48F1-8B1E-595DBED35375}.Debug|x86.ActiveCfg = Debug|Win32
-		{4E2F6569-0FD8-48F1-8B1E-595DBED35375}.Debug|x86.Build.0 = Debug|Win32
+		{4E2F6569-0FD8-48F1-8B1E-595DBED35375}.DebugUT|x64.ActiveCfg = DebugUT|x64
+		{4E2F6569-0FD8-48F1-8B1E-595DBED35375}.DebugUT|x64.Build.0 = DebugUT|x64
+		{4E2F6569-0FD8-48F1-8B1E-595DBED35375}.DebugUT|x86.ActiveCfg = DebugUT|Win32
+		{4E2F6569-0FD8-48F1-8B1E-595DBED35375}.DebugUT|x86.Build.0 = DebugUT|Win32
 		{4E2F6569-0FD8-48F1-8B1E-595DBED35375}.Release|x64.ActiveCfg = Release|x64
 		{4E2F6569-0FD8-48F1-8B1E-595DBED35375}.Release|x64.Build.0 = Release|x64
 		{4E2F6569-0FD8-48F1-8B1E-595DBED35375}.Release|x86.ActiveCfg = Release|Win32
